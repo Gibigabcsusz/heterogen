@@ -56,14 +56,14 @@ void median_filter_avx_omp(int imgHeight, int imgWidth, int imgWidthF, unsigned 
 			/* load and sort the first and second 8 long group of values*/
 			
 			// load the first 8 values (A00...A07 into regs r00...r07)
-			r00 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + (long)imgWidthF * (y_out + 0) * 3 + x_rgb_out + 0*3));
-			r01 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + (long)imgWidthF * (y_out + 0) * 3 + x_rgb_out + 1*3));
-			r02 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + (long)imgWidthF * (y_out + 0) * 3 + x_rgb_out + 2*3));
-			r03 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + (long)imgWidthF * (y_out + 0) * 3 + x_rgb_out + 3*3));
-			r04 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + (long)imgWidthF * (y_out + 0) * 3 + x_rgb_out + 4*3));
-			r05 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + (long)imgWidthF * (y_out + 1) * 3 + x_rgb_out + 0*3));
-			r06 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + (long)imgWidthF * (y_out + 1) * 3 + x_rgb_out + 1*3));
-			r07 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + (long)imgWidthF * (y_out + 1) * 3 + x_rgb_out + 2*3));
+			r00 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + imgWidthF * (y_out + 0) * 3 + x_rgb_out + 0*3));
+			r01 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + imgWidthF * (y_out + 0) * 3 + x_rgb_out + 1*3));
+			r02 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + imgWidthF * (y_out + 0) * 3 + x_rgb_out + 2*3));
+			r03 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + imgWidthF * (y_out + 0) * 3 + x_rgb_out + 3*3));
+			r04 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + imgWidthF * (y_out + 0) * 3 + x_rgb_out + 4*3));
+			r05 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + imgWidthF * (y_out + 1) * 3 + x_rgb_out + 0*3));
+			r06 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + imgWidthF * (y_out + 1) * 3 + x_rgb_out + 1*3));
+			r07 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + imgWidthF * (y_out + 1) * 3 + x_rgb_out + 2*3));
 			// values:		A00, A01, A02, A03, A04, A05, A06, A07, xxx, xxx, xxx, xxx, xxx, xxx, xxx
 			// registers:	r00, r01, r02, r03, r04, r05, r06, r07, r08, r09, r10, r11, r12, r13, r14
 
@@ -73,14 +73,14 @@ void median_filter_avx_omp(int imgHeight, int imgWidth, int imgWidthF, unsigned 
 			// store A07 in arr and load next 8 values
 			// (load A08...A15 into regs r07...r14)
 			_mm256_store_si256(arr+7, r07);
-			r07 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + (long)imgWidthF * (y_out + 1) * 3 + x_rgb_out + 3*3));
-			r08 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + (long)imgWidthF * (y_out + 1) * 3 + x_rgb_out + 4*3));
-			r09 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + (long)imgWidthF * (y_out + 2) * 3 + x_rgb_out + 0*3));
-			r10 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + (long)imgWidthF * (y_out + 2) * 3 + x_rgb_out + 1*3));
-			r11 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + (long)imgWidthF * (y_out + 2) * 3 + x_rgb_out + 2*3));
-			r12 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + (long)imgWidthF * (y_out + 2) * 3 + x_rgb_out + 3*3));
-			r13 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + (long)imgWidthF * (y_out + 2) * 3 + x_rgb_out + 4*3));
-			r14 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + (long)imgWidthF * (y_out + 3) * 3 + x_rgb_out + 0*3));
+			r07 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + imgWidthF * (y_out + 1) * 3 + x_rgb_out + 3*3));
+			r08 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + imgWidthF * (y_out + 1) * 3 + x_rgb_out + 4*3));
+			r09 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + imgWidthF * (y_out + 2) * 3 + x_rgb_out + 0*3));
+			r10 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + imgWidthF * (y_out + 2) * 3 + x_rgb_out + 1*3));
+			r11 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + imgWidthF * (y_out + 2) * 3 + x_rgb_out + 2*3));
+			r12 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + imgWidthF * (y_out + 2) * 3 + x_rgb_out + 3*3));
+			r13 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + imgWidthF * (y_out + 2) * 3 + x_rgb_out + 4*3));
+			r14 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + imgWidthF * (y_out + 3) * 3 + x_rgb_out + 0*3));
 			// values:		A00, A01, A02, A03, A04, A05, A06, A08, A09, A10, A11, A12, A13, A14, A15
 			// registers:	r00, r01, r02, r03, r04, r05, r06, r07, r08, r09, r10, r11, r12, r13, r14
 
@@ -153,15 +153,15 @@ void median_filter_avx_omp(int imgHeight, int imgWidth, int imgWidthF, unsigned 
 			// registers:	r00, r01, r02, r03, r04, r05, r06, r07, r08, r09, r10, r11, r12, r13, r14
 
 			// load values A16...A24 to regs r07...r14,r00
-			r07 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + (long)imgWidthF * (y_out + 3) * 3 + x_rgb_out + 1*3));
-			r08 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + (long)imgWidthF * (y_out + 3) * 3 + x_rgb_out + 2*3));
-			r09 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + (long)imgWidthF * (y_out + 3) * 3 + x_rgb_out + 3*3));
-			r10 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + (long)imgWidthF * (y_out + 3) * 3 + x_rgb_out + 4*3));
-			r11 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + (long)imgWidthF * (y_out + 4) * 3 + x_rgb_out + 0*3));
-			r12 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + (long)imgWidthF * (y_out + 4) * 3 + x_rgb_out + 1*3));
-			r13 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + (long)imgWidthF * (y_out + 4) * 3 + x_rgb_out + 2*3));
-			r14 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + (long)imgWidthF * (y_out + 4) * 3 + x_rgb_out + 3*3));
-			r00 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + (long)imgWidthF * (y_out + 4) * 3 + x_rgb_out + 4*3));
+			r07 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + imgWidthF * (y_out + 3) * 3 + x_rgb_out + 1*3));
+			r08 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + imgWidthF * (y_out + 3) * 3 + x_rgb_out + 2*3));
+			r09 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + imgWidthF * (y_out + 3) * 3 + x_rgb_out + 3*3));
+			r10 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + imgWidthF * (y_out + 3) * 3 + x_rgb_out + 4*3));
+			r11 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + imgWidthF * (y_out + 4) * 3 + x_rgb_out + 0*3));
+			r12 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + imgWidthF * (y_out + 4) * 3 + x_rgb_out + 1*3));
+			r13 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + imgWidthF * (y_out + 4) * 3 + x_rgb_out + 2*3));
+			r14 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + imgWidthF * (y_out + 4) * 3 + x_rgb_out + 3*3));
+			r00 = _mm256_lddqu_si256((__m256i*)(imgSrcExt + imgWidthF * (y_out + 4) * 3 + x_rgb_out + 4*3));
 			// values:		A24, A01, A02, A03, A04, A05, A06, A16, A17, A18, A19, A20, A21, A22, A23
 			// registers:	r00, r01, r02, r03, r04, r05, r06, r07, r08, r09, r10, r11, r12, r13, r14
 
@@ -217,10 +217,10 @@ void median_filter_avx_omp(int imgHeight, int imgWidth, int imgWidthF, unsigned 
 			// values:		A07, A08, A09, A10, A11, A12, A13, A16, A17, A18, A19, A20, A21, A24, A23
 			// registers:	r00, r01, r02, r03, r04, r05, r06, r07, r08, r09, r10, r11, r12, r13, r14
 
-			// sort value pairs		(A00,A16), (A06,A22)
-			// sort register pairs	(r00,r07), (r06,r13)
-			sort2(r00, r07, tmp)
-			sort2(r06, r13, tmp)
+			// sort value pairs		(A07,A23), (A08,A24)
+			// sort register pairs	(r00,r14), (r01,r13)
+			sort2(r00, r14, tmp)
+			sort2(r01, r13, tmp)
 
 			// load A06 into r14
 			// value in r14 don't need to be stored, this reg can be reused
@@ -240,7 +240,7 @@ void median_filter_avx_omp(int imgHeight, int imgWidth, int imgWidthF, unsigned 
 			// sort value pairs		(A12,A16), (A13,A17), (A06,A10), (A07,A11)
 			// sort register pairs	(r05,r07), (r06,r12), (r14,r03), (r00,r04)
 			sort2(r05, r07, tmp)
-			sort2(r06, r08, tmp)
+			sort2(r06, r12, tmp)
 			sort2(r14, r03, tmp)
 			sort2(r00, r04, tmp)
 
@@ -253,7 +253,7 @@ void median_filter_avx_omp(int imgHeight, int imgWidth, int imgWidthF, unsigned 
 
 
 			/* median is in r05 */
-			_mm256_storeu_si256((__m256i*)(imgDst + (long)imgWidth *y_out*3 + x_rgb_out), r05);
+			_mm256_storeu_si256((__m256i*)(imgDst + imgWidth *y_out*3 + x_rgb_out), r05);
 
 		}
 	}
