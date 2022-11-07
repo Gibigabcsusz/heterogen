@@ -238,9 +238,9 @@ void median_filter_avx_omp(int imgHeight, int imgWidth, int imgWidthF, unsigned 
 			sort2(r06, r12, tmp)
 
 			// sort value pairs		(A12,A16), (A13,A17), (A06,A10), (A07,A11)
-			// sort register pairs	(r05,r07), (r06,r12), (r14,r03), (r00,r04)
+			// sort register pairs	(r05,r07), (r06,r08), (r14,r03), (r00,r04)
 			sort2(r05, r07, tmp)
-			sort2(r06, r12, tmp)
+			sort2(r06, r08, tmp)
 			sort2(r14, r03, tmp)
 			sort2(r00, r04, tmp)
 
