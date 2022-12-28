@@ -153,149 +153,149 @@ __kernel void kernel_median(__global unsigned char* gInput,
         }
 
         // choose the median from the loaded values
-            // template: a<b ? {} : {tmp=a; a=b; b=tmp;};
-            // template result: a<b
+            // template: if(a<b) {tmp=a; a=b; b=tmp;};
+            // template result: a>b
 
-        (values[ 0]<values[ 1]) ? {} : {tmp=values[ 0]; values[ 0]=values[ 1]; values[ 1]=tmp;};
-        (values[ 2]<values[ 3]) ? {} : {tmp=values[ 2]; values[ 2]=values[ 3]; values[ 3]=tmp;};
-        (values[ 4]<values[ 5]) ? {} : {tmp=values[ 4]; values[ 4]=values[ 5]; values[ 5]=tmp;};
-        (values[ 6]<values[ 7]) ? {} : {tmp=values[ 6]; values[ 6]=values[ 7]; values[ 7]=tmp;};
-        (values[ 8]<values[ 9]) ? {} : {tmp=values[ 8]; values[ 8]=values[ 9]; values[ 9]=tmp;};
-        (values[10]<values[11]) ? {} : {tmp=values[10]; values[10]=values[11]; values[11]=tmp;};
-        (values[12]<values[13]) ? {} : {tmp=values[12]; values[12]=values[13]; values[13]=tmp;};
-        (values[14]<values[15]) ? {} : {tmp=values[14]; values[14]=values[15]; values[15]=tmp;};
-        (values[16]<values[17]) ? {} : {tmp=values[16]; values[16]=values[17]; values[17]=tmp;};
-        (values[18]<values[19]) ? {} : {tmp=values[18]; values[18]=values[19]; values[19]=tmp;};
-        (values[20]<values[21]) ? {} : {tmp=values[20]; values[20]=values[21]; values[21]=tmp;};
-        (values[22]<values[23]) ? {} : {tmp=values[22]; values[22]=values[23]; values[23]=tmp;};
-        (values[ 0]<values[ 2]) ? {} : {tmp=values[ 0]; values[ 0]=values[ 2]; values[ 2]=tmp;};
-        (values[ 1]<values[ 3]) ? {} : {tmp=values[ 1]; values[ 1]=values[ 3]; values[ 3]=tmp;};
-        (values[ 4]<values[ 6]) ? {} : {tmp=values[ 4]; values[ 4]=values[ 6]; values[ 6]=tmp;};
-        (values[ 5]<values[ 7]) ? {} : {tmp=values[ 5]; values[ 5]=values[ 7]; values[ 7]=tmp;};
-        (values[ 8]<values[10]) ? {} : {tmp=values[ 8]; values[ 8]=values[10]; values[10]=tmp;};
-        (values[ 9]<values[11]) ? {} : {tmp=values[ 9]; values[ 9]=values[11]; values[11]=tmp;};
-        (values[12]<values[14]) ? {} : {tmp=values[12]; values[12]=values[14]; values[14]=tmp;};
-        (values[13]<values[15]) ? {} : {tmp=values[13]; values[13]=values[15]; values[15]=tmp;};
-        (values[16]<values[18]) ? {} : {tmp=values[16]; values[16]=values[18]; values[18]=tmp;};
-        (values[17]<values[19]) ? {} : {tmp=values[17]; values[17]=values[19]; values[19]=tmp;};
-        (values[20]<values[22]) ? {} : {tmp=values[20]; values[20]=values[22]; values[22]=tmp;};
-        (values[21]<values[23]) ? {} : {tmp=values[21]; values[21]=values[23]; values[23]=tmp;};
-        (values[ 1]<values[ 2]) ? {} : {tmp=values[ 1]; values[ 1]=values[ 2]; values[ 2]=tmp;};
-        (values[ 5]<values[ 6]) ? {} : {tmp=values[ 5]; values[ 5]=values[ 6]; values[ 6]=tmp;};
-        (values[ 9]<values[10]) ? {} : {tmp=values[ 9]; values[ 9]=values[10]; values[10]=tmp;};
-        (values[13]<values[14]) ? {} : {tmp=values[13]; values[13]=values[14]; values[14]=tmp;};
-        (values[17]<values[18]) ? {} : {tmp=values[17]; values[17]=values[18]; values[18]=tmp;};
-        (values[21]<values[22]) ? {} : {tmp=values[21]; values[21]=values[22]; values[22]=tmp;};
-        (values[ 0]<values[ 4]) ? {} : {tmp=values[ 0]; values[ 0]=values[ 4]; values[ 4]=tmp;};
-        (values[ 1]<values[ 5]) ? {} : {tmp=values[ 1]; values[ 1]=values[ 5]; values[ 5]=tmp;};
-        (values[ 2]<values[ 6]) ? {} : {tmp=values[ 2]; values[ 2]=values[ 6]; values[ 6]=tmp;};
-        (values[ 3]<values[ 7]) ? {} : {tmp=values[ 3]; values[ 3]=values[ 7]; values[ 7]=tmp;};
-        (values[ 8]<values[12]) ? {} : {tmp=values[ 8]; values[ 8]=values[12]; values[12]=tmp;};
-        (values[ 9]<values[13]) ? {} : {tmp=values[ 9]; values[ 9]=values[13]; values[13]=tmp;};
-        (values[10]<values[14]) ? {} : {tmp=values[10]; values[10]=values[14]; values[14]=tmp;};
-        (values[11]<values[15]) ? {} : {tmp=values[11]; values[11]=values[15]; values[15]=tmp;};
-        (values[16]<values[20]) ? {} : {tmp=values[16]; values[16]=values[20]; values[20]=tmp;};
-        (values[17]<values[21]) ? {} : {tmp=values[17]; values[17]=values[21]; values[21]=tmp;};
-        (values[18]<values[22]) ? {} : {tmp=values[18]; values[18]=values[22]; values[22]=tmp;};
-        (values[19]<values[23]) ? {} : {tmp=values[19]; values[19]=values[23]; values[23]=tmp;};
-        (values[ 2]<values[ 4]) ? {} : {tmp=values[ 2]; values[ 2]=values[ 4]; values[ 4]=tmp;};
-        (values[ 3]<values[ 5]) ? {} : {tmp=values[ 3]; values[ 3]=values[ 5]; values[ 5]=tmp;};
-        (values[10]<values[12]) ? {} : {tmp=values[10]; values[10]=values[12]; values[12]=tmp;};
-        (values[11]<values[13]) ? {} : {tmp=values[11]; values[11]=values[13]; values[13]=tmp;};
-        (values[18]<values[20]) ? {} : {tmp=values[18]; values[18]=values[20]; values[20]=tmp;};
-        (values[19]<values[21]) ? {} : {tmp=values[19]; values[19]=values[21]; values[21]=tmp;};
-        (values[ 1]<values[ 2]) ? {} : {tmp=values[ 1]; values[ 1]=values[ 2]; values[ 2]=tmp;};
-        (values[ 3]<values[ 4]) ? {} : {tmp=values[ 3]; values[ 3]=values[ 4]; values[ 4]=tmp;};
-        (values[ 5]<values[ 6]) ? {} : {tmp=values[ 5]; values[ 5]=values[ 6]; values[ 6]=tmp;};
-        (values[ 9]<values[10]) ? {} : {tmp=values[ 9]; values[ 9]=values[10]; values[10]=tmp;};
-        (values[11]<values[12]) ? {} : {tmp=values[11]; values[11]=values[12]; values[12]=tmp;};
-        (values[13]<values[14]) ? {} : {tmp=values[13]; values[13]=values[14]; values[14]=tmp;};
-        (values[17]<values[18]) ? {} : {tmp=values[17]; values[17]=values[18]; values[18]=tmp;};
-        (values[19]<values[20]) ? {} : {tmp=values[19]; values[19]=values[20]; values[20]=tmp;};
-        (values[21]<values[22]) ? {} : {tmp=values[21]; values[21]=values[22]; values[22]=tmp;};
-        (values[ 0]<values[ 8]) ? {} : {tmp=values[ 0]; values[ 0]=values[ 8]; values[ 8]=tmp;};
-        (values[ 1]<values[ 9]) ? {} : {tmp=values[ 1]; values[ 1]=values[ 9]; values[ 9]=tmp;};
-        (values[ 2]<values[10]) ? {} : {tmp=values[ 2]; values[ 2]=values[10]; values[10]=tmp;};
-        (values[ 3]<values[11]) ? {} : {tmp=values[ 3]; values[ 3]=values[11]; values[11]=tmp;};
-        (values[ 4]<values[12]) ? {} : {tmp=values[ 4]; values[ 4]=values[12]; values[12]=tmp;};
-        (values[ 5]<values[13]) ? {} : {tmp=values[ 5]; values[ 5]=values[13]; values[13]=tmp;};
-        (values[ 6]<values[14]) ? {} : {tmp=values[ 6]; values[ 6]=values[14]; values[14]=tmp;};
-        (values[ 7]<values[15]) ? {} : {tmp=values[ 7]; values[ 7]=values[15]; values[15]=tmp;};
-        (values[16]<values[24]) ? {} : {tmp=values[16]; values[16]=values[24]; values[24]=tmp;};
-        (values[ 4]<values[ 8]) ? {} : {tmp=values[ 4]; values[ 4]=values[ 8]; values[ 8]=tmp;};
-        (values[ 5]<values[ 9]) ? {} : {tmp=values[ 5]; values[ 5]=values[ 9]; values[ 9]=tmp;};
-        (values[ 6]<values[10]) ? {} : {tmp=values[ 6]; values[ 6]=values[10]; values[10]=tmp;};
-        (values[ 7]<values[11]) ? {} : {tmp=values[ 7]; values[ 7]=values[11]; values[11]=tmp;};
-        (values[20]<values[24]) ? {} : {tmp=values[20]; values[20]=values[24]; values[24]=tmp;};
-        (values[ 2]<values[ 4]) ? {} : {tmp=values[ 2]; values[ 2]=values[ 4]; values[ 4]=tmp;};
-        (values[ 3]<values[ 5]) ? {} : {tmp=values[ 3]; values[ 3]=values[ 5]; values[ 5]=tmp;};
-        (values[ 6]<values[ 8]) ? {} : {tmp=values[ 6]; values[ 6]=values[ 8]; values[ 8]=tmp;};
-        (values[ 7]<values[ 9]) ? {} : {tmp=values[ 7]; values[ 7]=values[ 9]; values[ 9]=tmp;};
-        (values[10]<values[12]) ? {} : {tmp=values[10]; values[10]=values[12]; values[12]=tmp;};
-        (values[11]<values[13]) ? {} : {tmp=values[11]; values[11]=values[13]; values[13]=tmp;};
-        (values[18]<values[20]) ? {} : {tmp=values[18]; values[18]=values[20]; values[20]=tmp;};
-        (values[19]<values[21]) ? {} : {tmp=values[19]; values[19]=values[21]; values[21]=tmp;};
-        (values[22]<values[24]) ? {} : {tmp=values[22]; values[22]=values[24]; values[24]=tmp;};
-        (values[ 1]<values[ 2]) ? {} : {tmp=values[ 1]; values[ 1]=values[ 2]; values[ 2]=tmp;};
-        (values[ 3]<values[ 4]) ? {} : {tmp=values[ 3]; values[ 3]=values[ 4]; values[ 4]=tmp;};
-        (values[ 5]<values[ 6]) ? {} : {tmp=values[ 5]; values[ 5]=values[ 6]; values[ 6]=tmp;};
-        (values[ 7]<values[ 8]) ? {} : {tmp=values[ 7]; values[ 7]=values[ 8]; values[ 8]=tmp;};
-        (values[ 9]<values[10]) ? {} : {tmp=values[ 9]; values[ 9]=values[10]; values[10]=tmp;};
-        (values[11]<values[12]) ? {} : {tmp=values[11]; values[11]=values[12]; values[12]=tmp;};
-        (values[13]<values[14]) ? {} : {tmp=values[13]; values[13]=values[14]; values[14]=tmp;};
-        (values[17]<values[18]) ? {} : {tmp=values[17]; values[17]=values[18]; values[18]=tmp;};
-        (values[19]<values[20]) ? {} : {tmp=values[19]; values[19]=values[20]; values[20]=tmp;};
-        (values[21]<values[22]) ? {} : {tmp=values[21]; values[21]=values[22]; values[22]=tmp;};
-        (values[23]<values[24]) ? {} : {tmp=values[23]; values[23]=values[24]; values[24]=tmp;};
-        (values[ 0]<values[16]) ? {} : {tmp=values[ 0]; values[ 0]=values[16]; values[16]=tmp;};
-        (values[ 1]<values[17]) ? {} : {tmp=values[ 1]; values[ 1]=values[17]; values[17]=tmp;};
-        (values[ 2]<values[18]) ? {} : {tmp=values[ 2]; values[ 2]=values[18]; values[18]=tmp;};
-        (values[ 3]<values[19]) ? {} : {tmp=values[ 3]; values[ 3]=values[19]; values[19]=tmp;};
-        (values[ 4]<values[20]) ? {} : {tmp=values[ 4]; values[ 4]=values[20]; values[20]=tmp;};
-        (values[ 5]<values[21]) ? {} : {tmp=values[ 5]; values[ 5]=values[21]; values[21]=tmp;};
-        (values[ 6]<values[22]) ? {} : {tmp=values[ 6]; values[ 6]=values[22]; values[22]=tmp;};
-        (values[ 7]<values[23]) ? {} : {tmp=values[ 7]; values[ 7]=values[23]; values[23]=tmp;};
-        (values[ 8]<values[24]) ? {} : {tmp=values[ 8]; values[ 8]=values[24]; values[24]=tmp;};
-        (values[ 8]<values[16]) ? {} : {tmp=values[ 8]; values[ 8]=values[16]; values[16]=tmp;};
-        (values[ 9]<values[17]) ? {} : {tmp=values[ 9]; values[ 9]=values[17]; values[17]=tmp;};
-        (values[10]<values[18]) ? {} : {tmp=values[10]; values[10]=values[18]; values[18]=tmp;};
-        (values[11]<values[19]) ? {} : {tmp=values[11]; values[11]=values[19]; values[19]=tmp;};
-        (values[12]<values[20]) ? {} : {tmp=values[12]; values[12]=values[20]; values[20]=tmp;};
-        (values[13]<values[21]) ? {} : {tmp=values[13]; values[13]=values[21]; values[21]=tmp;};
-//        (values[14]<values[22]) ? {} : {tmp=values[14]; values[14]=values[22]; values[22]=tmp;};
-//        (values[15]<values[23]) ? {} : {tmp=values[15]; values[15]=values[23]; values[23]=tmp;};
-//        (values[ 4]<values[ 8]) ? {} : {tmp=values[ 4]; values[ 4]=values[ 8]; values[ 8]=tmp;};
-//        (values[ 5]<values[ 9]) ? {} : {tmp=values[ 5]; values[ 5]=values[ 9]; values[ 9]=tmp;};
-        (values[ 6]<values[10]) ? {} : {tmp=values[ 6]; values[ 6]=values[10]; values[10]=tmp;};
-        (values[ 7]<values[11]) ? {} : {tmp=values[ 7]; values[ 7]=values[11]; values[11]=tmp;};
-        (values[12]<values[16]) ? {} : {tmp=values[12]; values[12]=values[16]; values[16]=tmp;};
-        (values[13]<values[17]) ? {} : {tmp=values[13]; values[13]=values[17]; values[17]=tmp;};
-//        (values[14]<values[18]) ? {} : {tmp=values[14]; values[14]=values[18]; values[18]=tmp;};
-//        (values[15]<values[19]) ? {} : {tmp=values[15]; values[15]=values[19]; values[19]=tmp;};
-//        (values[20]<values[24]) ? {} : {tmp=values[20]; values[20]=values[24]; values[24]=tmp;};
-//        (values[ 2]<values[ 4]) ? {} : {tmp=values[ 2]; values[ 2]=values[ 4]; values[ 4]=tmp;};
-//        (values[ 3]<values[ 5]) ? {} : {tmp=values[ 3]; values[ 3]=values[ 5]; values[ 5]=tmp;};
-//        (values[ 6]<values[ 8]) ? {} : {tmp=values[ 6]; values[ 6]=values[ 8]; values[ 8]=tmp;};
-//        (values[ 7]<values[ 9]) ? {} : {tmp=values[ 7]; values[ 7]=values[ 9]; values[ 9]=tmp;};
-        (values[10]<values[12]) ? {} : {tmp=values[10]; values[10]=values[12]; values[12]=tmp;};
-        (values[11]<values[13]) ? {} : {tmp=values[11]; values[11]=values[13]; values[13]=tmp;};
-//        (values[14]<values[16]) ? {} : {tmp=values[14]; values[14]=values[16]; values[16]=tmp;};
-//        (values[15]<values[17]) ? {} : {tmp=values[15]; values[15]=values[17]; values[17]=tmp;};
-//        (values[18]<values[20]) ? {} : {tmp=values[18]; values[18]=values[20]; values[20]=tmp;};
-//        (values[19]<values[21]) ? {} : {tmp=values[19]; values[19]=values[21]; values[21]=tmp;};
-//        (values[22]<values[24]) ? {} : {tmp=values[22]; values[22]=values[24]; values[24]=tmp;};
-//        (values[ 1]<values[ 2]) ? {} : {tmp=values[ 1]; values[ 1]=values[ 2]; values[ 2]=tmp;};
-//        (values[ 3]<values[ 4]) ? {} : {tmp=values[ 3]; values[ 3]=values[ 4]; values[ 4]=tmp;};
-//        (values[ 5]<values[ 6]) ? {} : {tmp=values[ 5]; values[ 5]=values[ 6]; values[ 6]=tmp;};
-//        (values[ 7]<values[ 8]) ? {} : {tmp=values[ 7]; values[ 7]=values[ 8]; values[ 8]=tmp;};
-//        (values[ 9]<values[10]) ? {} : {tmp=values[ 9]; values[ 9]=values[10]; values[10]=tmp;};
-        (values[11]<values[12]) ? {} : {tmp=values[11]; values[11]=values[12]; values[12]=tmp;};
-//        (values[13]<values[14]) ? {} : {tmp=values[13]; values[13]=values[14]; values[14]=tmp;};
-//        (values[15]<values[16]) ? {} : {tmp=values[15]; values[15]=values[16]; values[16]=tmp;};
-//        (values[17]<values[18]) ? {} : {tmp=values[17]; values[17]=values[18]; values[18]=tmp;};
-//        (values[19]<values[20]) ? {} : {tmp=values[19]; values[19]=values[20]; values[20]=tmp;};
-//        (values[21]<values[22]) ? {} : {tmp=values[21]; values[21]=values[22]; values[22]=tmp;};
-//        (values[23]<values[24]) ? {} : {tmp=values[23]; values[23]=values[24]; values[24]=tmp;};
+        if(values[ 0]<values[ 1]) {tmp=values[ 0]; values[ 0]=values[ 1]; values[ 1]=tmp;}
+        if(values[ 2]<values[ 3]) {tmp=values[ 2]; values[ 2]=values[ 3]; values[ 3]=tmp;}
+        if(values[ 4]<values[ 5]) {tmp=values[ 4]; values[ 4]=values[ 5]; values[ 5]=tmp;}
+        if(values[ 6]<values[ 7]) {tmp=values[ 6]; values[ 6]=values[ 7]; values[ 7]=tmp;}
+        if(values[ 8]<values[ 9]) {tmp=values[ 8]; values[ 8]=values[ 9]; values[ 9]=tmp;}
+        if(values[10]<values[11]) {tmp=values[10]; values[10]=values[11]; values[11]=tmp;}
+        if(values[12]<values[13]) {tmp=values[12]; values[12]=values[13]; values[13]=tmp;}
+        if(values[14]<values[15]) {tmp=values[14]; values[14]=values[15]; values[15]=tmp;}
+        if(values[16]<values[17]) {tmp=values[16]; values[16]=values[17]; values[17]=tmp;}
+        if(values[18]<values[19]) {tmp=values[18]; values[18]=values[19]; values[19]=tmp;}
+        if(values[20]<values[21]) {tmp=values[20]; values[20]=values[21]; values[21]=tmp;}
+        if(values[22]<values[23]) {tmp=values[22]; values[22]=values[23]; values[23]=tmp;}
+        if(values[ 0]<values[ 2]) {tmp=values[ 0]; values[ 0]=values[ 2]; values[ 2]=tmp;}
+        if(values[ 1]<values[ 3]) {tmp=values[ 1]; values[ 1]=values[ 3]; values[ 3]=tmp;}
+        if(values[ 4]<values[ 6]) {tmp=values[ 4]; values[ 4]=values[ 6]; values[ 6]=tmp;}
+        if(values[ 5]<values[ 7]) {tmp=values[ 5]; values[ 5]=values[ 7]; values[ 7]=tmp;}
+        if(values[ 8]<values[10]) {tmp=values[ 8]; values[ 8]=values[10]; values[10]=tmp;}
+        if(values[ 9]<values[11]) {tmp=values[ 9]; values[ 9]=values[11]; values[11]=tmp;}
+        if(values[12]<values[14]) {tmp=values[12]; values[12]=values[14]; values[14]=tmp;}
+        if(values[13]<values[15]) {tmp=values[13]; values[13]=values[15]; values[15]=tmp;}
+        if(values[16]<values[18]) {tmp=values[16]; values[16]=values[18]; values[18]=tmp;}
+        if(values[17]<values[19]) {tmp=values[17]; values[17]=values[19]; values[19]=tmp;}
+        if(values[20]<values[22]) {tmp=values[20]; values[20]=values[22]; values[22]=tmp;}
+        if(values[21]<values[23]) {tmp=values[21]; values[21]=values[23]; values[23]=tmp;}
+        if(values[ 1]<values[ 2]) {tmp=values[ 1]; values[ 1]=values[ 2]; values[ 2]=tmp;}
+        if(values[ 5]<values[ 6]) {tmp=values[ 5]; values[ 5]=values[ 6]; values[ 6]=tmp;}
+        if(values[ 9]<values[10]) {tmp=values[ 9]; values[ 9]=values[10]; values[10]=tmp;}
+        if(values[13]<values[14]) {tmp=values[13]; values[13]=values[14]; values[14]=tmp;}
+        if(values[17]<values[18]) {tmp=values[17]; values[17]=values[18]; values[18]=tmp;}
+        if(values[21]<values[22]) {tmp=values[21]; values[21]=values[22]; values[22]=tmp;}
+        if(values[ 0]<values[ 4]) {tmp=values[ 0]; values[ 0]=values[ 4]; values[ 4]=tmp;}
+        if(values[ 1]<values[ 5]) {tmp=values[ 1]; values[ 1]=values[ 5]; values[ 5]=tmp;}
+        if(values[ 2]<values[ 6]) {tmp=values[ 2]; values[ 2]=values[ 6]; values[ 6]=tmp;}
+        if(values[ 3]<values[ 7]) {tmp=values[ 3]; values[ 3]=values[ 7]; values[ 7]=tmp;}
+        if(values[ 8]<values[12]) {tmp=values[ 8]; values[ 8]=values[12]; values[12]=tmp;}
+        if(values[ 9]<values[13]) {tmp=values[ 9]; values[ 9]=values[13]; values[13]=tmp;}
+        if(values[10]<values[14]) {tmp=values[10]; values[10]=values[14]; values[14]=tmp;}
+        if(values[11]<values[15]) {tmp=values[11]; values[11]=values[15]; values[15]=tmp;}
+        if(values[16]<values[20]) {tmp=values[16]; values[16]=values[20]; values[20]=tmp;}
+        if(values[17]<values[21]) {tmp=values[17]; values[17]=values[21]; values[21]=tmp;}
+        if(values[18]<values[22]) {tmp=values[18]; values[18]=values[22]; values[22]=tmp;}
+        if(values[19]<values[23]) {tmp=values[19]; values[19]=values[23]; values[23]=tmp;}
+        if(values[ 2]<values[ 4]) {tmp=values[ 2]; values[ 2]=values[ 4]; values[ 4]=tmp;}
+        if(values[ 3]<values[ 5]) {tmp=values[ 3]; values[ 3]=values[ 5]; values[ 5]=tmp;}
+        if(values[10]<values[12]) {tmp=values[10]; values[10]=values[12]; values[12]=tmp;}
+        if(values[11]<values[13]) {tmp=values[11]; values[11]=values[13]; values[13]=tmp;}
+        if(values[18]<values[20]) {tmp=values[18]; values[18]=values[20]; values[20]=tmp;}
+        if(values[19]<values[21]) {tmp=values[19]; values[19]=values[21]; values[21]=tmp;}
+        if(values[ 1]<values[ 2]) {tmp=values[ 1]; values[ 1]=values[ 2]; values[ 2]=tmp;}
+        if(values[ 3]<values[ 4]) {tmp=values[ 3]; values[ 3]=values[ 4]; values[ 4]=tmp;}
+        if(values[ 5]<values[ 6]) {tmp=values[ 5]; values[ 5]=values[ 6]; values[ 6]=tmp;}
+        if(values[ 9]<values[10]) {tmp=values[ 9]; values[ 9]=values[10]; values[10]=tmp;}
+        if(values[11]<values[12]) {tmp=values[11]; values[11]=values[12]; values[12]=tmp;}
+        if(values[13]<values[14]) {tmp=values[13]; values[13]=values[14]; values[14]=tmp;}
+        if(values[17]<values[18]) {tmp=values[17]; values[17]=values[18]; values[18]=tmp;}
+        if(values[19]<values[20]) {tmp=values[19]; values[19]=values[20]; values[20]=tmp;}
+        if(values[21]<values[22]) {tmp=values[21]; values[21]=values[22]; values[22]=tmp;}
+        if(values[ 0]<values[ 8]) {tmp=values[ 0]; values[ 0]=values[ 8]; values[ 8]=tmp;}
+        if(values[ 1]<values[ 9]) {tmp=values[ 1]; values[ 1]=values[ 9]; values[ 9]=tmp;}
+        if(values[ 2]<values[10]) {tmp=values[ 2]; values[ 2]=values[10]; values[10]=tmp;}
+        if(values[ 3]<values[11]) {tmp=values[ 3]; values[ 3]=values[11]; values[11]=tmp;}
+        if(values[ 4]<values[12]) {tmp=values[ 4]; values[ 4]=values[12]; values[12]=tmp;}
+        if(values[ 5]<values[13]) {tmp=values[ 5]; values[ 5]=values[13]; values[13]=tmp;}
+        if(values[ 6]<values[14]) {tmp=values[ 6]; values[ 6]=values[14]; values[14]=tmp;}
+        if(values[ 7]<values[15]) {tmp=values[ 7]; values[ 7]=values[15]; values[15]=tmp;}
+        if(values[16]<values[24]) {tmp=values[16]; values[16]=values[24]; values[24]=tmp;}
+        if(values[ 4]<values[ 8]) {tmp=values[ 4]; values[ 4]=values[ 8]; values[ 8]=tmp;}
+        if(values[ 5]<values[ 9]) {tmp=values[ 5]; values[ 5]=values[ 9]; values[ 9]=tmp;}
+        if(values[ 6]<values[10]) {tmp=values[ 6]; values[ 6]=values[10]; values[10]=tmp;}
+        if(values[ 7]<values[11]) {tmp=values[ 7]; values[ 7]=values[11]; values[11]=tmp;}
+        if(values[20]<values[24]) {tmp=values[20]; values[20]=values[24]; values[24]=tmp;}
+        if(values[ 2]<values[ 4]) {tmp=values[ 2]; values[ 2]=values[ 4]; values[ 4]=tmp;}
+        if(values[ 3]<values[ 5]) {tmp=values[ 3]; values[ 3]=values[ 5]; values[ 5]=tmp;}
+        if(values[ 6]<values[ 8]) {tmp=values[ 6]; values[ 6]=values[ 8]; values[ 8]=tmp;}
+        if(values[ 7]<values[ 9]) {tmp=values[ 7]; values[ 7]=values[ 9]; values[ 9]=tmp;}
+        if(values[10]<values[12]) {tmp=values[10]; values[10]=values[12]; values[12]=tmp;}
+        if(values[11]<values[13]) {tmp=values[11]; values[11]=values[13]; values[13]=tmp;}
+        if(values[18]<values[20]) {tmp=values[18]; values[18]=values[20]; values[20]=tmp;}
+        if(values[19]<values[21]) {tmp=values[19]; values[19]=values[21]; values[21]=tmp;}
+        if(values[22]<values[24]) {tmp=values[22]; values[22]=values[24]; values[24]=tmp;}
+        if(values[ 1]<values[ 2]) {tmp=values[ 1]; values[ 1]=values[ 2]; values[ 2]=tmp;}
+        if(values[ 3]<values[ 4]) {tmp=values[ 3]; values[ 3]=values[ 4]; values[ 4]=tmp;}
+        if(values[ 5]<values[ 6]) {tmp=values[ 5]; values[ 5]=values[ 6]; values[ 6]=tmp;}
+        if(values[ 7]<values[ 8]) {tmp=values[ 7]; values[ 7]=values[ 8]; values[ 8]=tmp;}
+        if(values[ 9]<values[10]) {tmp=values[ 9]; values[ 9]=values[10]; values[10]=tmp;}
+        if(values[11]<values[12]) {tmp=values[11]; values[11]=values[12]; values[12]=tmp;}
+        if(values[13]<values[14]) {tmp=values[13]; values[13]=values[14]; values[14]=tmp;}
+        if(values[17]<values[18]) {tmp=values[17]; values[17]=values[18]; values[18]=tmp;}
+        if(values[19]<values[20]) {tmp=values[19]; values[19]=values[20]; values[20]=tmp;}
+        if(values[21]<values[22]) {tmp=values[21]; values[21]=values[22]; values[22]=tmp;}
+        if(values[23]<values[24]) {tmp=values[23]; values[23]=values[24]; values[24]=tmp;}
+        if(values[ 0]<values[16]) {tmp=values[ 0]; values[ 0]=values[16]; values[16]=tmp;}
+        if(values[ 1]<values[17]) {tmp=values[ 1]; values[ 1]=values[17]; values[17]=tmp;}
+        if(values[ 2]<values[18]) {tmp=values[ 2]; values[ 2]=values[18]; values[18]=tmp;}
+        if(values[ 3]<values[19]) {tmp=values[ 3]; values[ 3]=values[19]; values[19]=tmp;}
+        if(values[ 4]<values[20]) {tmp=values[ 4]; values[ 4]=values[20]; values[20]=tmp;}
+        if(values[ 5]<values[21]) {tmp=values[ 5]; values[ 5]=values[21]; values[21]=tmp;}
+        if(values[ 6]<values[22]) {tmp=values[ 6]; values[ 6]=values[22]; values[22]=tmp;}
+        if(values[ 7]<values[23]) {tmp=values[ 7]; values[ 7]=values[23]; values[23]=tmp;}
+        if(values[ 8]<values[24]) {tmp=values[ 8]; values[ 8]=values[24]; values[24]=tmp;}
+        if(values[ 8]<values[16]) {tmp=values[ 8]; values[ 8]=values[16]; values[16]=tmp;}
+        if(values[ 9]<values[17]) {tmp=values[ 9]; values[ 9]=values[17]; values[17]=tmp;}
+        if(values[10]<values[18]) {tmp=values[10]; values[10]=values[18]; values[18]=tmp;}
+        if(values[11]<values[19]) {tmp=values[11]; values[11]=values[19]; values[19]=tmp;}
+        if(values[12]<values[20]) {tmp=values[12]; values[12]=values[20]; values[20]=tmp;}
+        if(values[13]<values[21]) {tmp=values[13]; values[13]=values[21]; values[21]=tmp;}
+//        if(values[14]<values[22]) {tmp=values[14]; values[14]=values[22]; values[22]=tmp;}
+//        if(values[15]<values[23]) {tmp=values[15]; values[15]=values[23]; values[23]=tmp;}
+//        if(values[ 4]<values[ 8]) {tmp=values[ 4]; values[ 4]=values[ 8]; values[ 8]=tmp;}
+//        if(values[ 5]<values[ 9]) {tmp=values[ 5]; values[ 5]=values[ 9]; values[ 9]=tmp;}
+        if(values[ 6]<values[10]) {tmp=values[ 6]; values[ 6]=values[10]; values[10]=tmp;}
+        if(values[ 7]<values[11]) {tmp=values[ 7]; values[ 7]=values[11]; values[11]=tmp;}
+        if(values[12]<values[16]) {tmp=values[12]; values[12]=values[16]; values[16]=tmp;}
+        if(values[13]<values[17]) {tmp=values[13]; values[13]=values[17]; values[17]=tmp;}
+//        if(values[14]<values[18]) {tmp=values[14]; values[14]=values[18]; values[18]=tmp;}
+//        if(values[15]<values[19]) {tmp=values[15]; values[15]=values[19]; values[19]=tmp;}
+//        if(values[20]<values[24]) {tmp=values[20]; values[20]=values[24]; values[24]=tmp;}
+//        if(values[ 2]<values[ 4]) {tmp=values[ 2]; values[ 2]=values[ 4]; values[ 4]=tmp;}
+//        if(values[ 3]<values[ 5]) {tmp=values[ 3]; values[ 3]=values[ 5]; values[ 5]=tmp;}
+//        if(values[ 6]<values[ 8]) {tmp=values[ 6]; values[ 6]=values[ 8]; values[ 8]=tmp;}
+//        if(values[ 7]<values[ 9]) {tmp=values[ 7]; values[ 7]=values[ 9]; values[ 9]=tmp;}
+        if(values[10]<values[12]) {tmp=values[10]; values[10]=values[12]; values[12]=tmp;}
+        if(values[11]<values[13]) {tmp=values[11]; values[11]=values[13]; values[13]=tmp;}
+//        if(values[14]<values[16]) {tmp=values[14]; values[14]=values[16]; values[16]=tmp;}
+//        if(values[15]<values[17]) {tmp=values[15]; values[15]=values[17]; values[17]=tmp;}
+//        if(values[18]<values[20]) {tmp=values[18]; values[18]=values[20]; values[20]=tmp;}
+//        if(values[19]<values[21]) {tmp=values[19]; values[19]=values[21]; values[21]=tmp;}
+//        if(values[22]<values[24]) {tmp=values[22]; values[22]=values[24]; values[24]=tmp;}
+//        if(values[ 1]<values[ 2]) {tmp=values[ 1]; values[ 1]=values[ 2]; values[ 2]=tmp;}
+//        if(values[ 3]<values[ 4]) {tmp=values[ 3]; values[ 3]=values[ 4]; values[ 4]=tmp;}
+//        if(values[ 5]<values[ 6]) {tmp=values[ 5]; values[ 5]=values[ 6]; values[ 6]=tmp;}
+//        if(values[ 7]<values[ 8]) {tmp=values[ 7]; values[ 7]=values[ 8]; values[ 8]=tmp;}
+//        if(values[ 9]<values[10]) {tmp=values[ 9]; values[ 9]=values[10]; values[10]=tmp;}
+        if(values[11]<values[12]) {tmp=values[11]; values[11]=values[12]; values[12]=tmp;}
+//        if(values[13]<values[14]) {tmp=values[13]; values[13]=values[14]; values[14]=tmp;}
+//        if(values[15]<values[16]) {tmp=values[15]; values[15]=values[16]; values[16]=tmp;}
+//        if(values[17]<values[18]) {tmp=values[17]; values[17]=values[18]; values[18]=tmp;}
+//        if(values[19]<values[20]) {tmp=values[19]; values[19]=values[20]; values[20]=tmp;}
+//        if(values[21]<values[22]) {tmp=values[21]; values[21]=values[22]; values[22]=tmp;}
+//        if(values[23]<values[24]) {tmp=values[23]; values[23]=values[24]; values[24]=tmp;}
 
         medians[channel] = values[12];
     }
