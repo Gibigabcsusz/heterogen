@@ -2,9 +2,9 @@
 #define FILTER_H 5
 
 #define RUNS 1
-#define KERNEL_RUNS 100
+#define KERNEL_RUNS 1000
 
-#define FIXED_OCL_DEVICE 1
+#define FIXED_OCL_DEVICE 0
 #define FIXED_OCL_DEVICE_ID 0
 
 #define KERNEL_FILE_NAME ".\\_src\\opencl_kernels.cl"

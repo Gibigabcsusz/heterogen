@@ -13,7 +13,7 @@ int main(void)
                 {
                     if((i+j)/(p*2)==(i+j+k)/(p*2) && i+j+k<25)
                         //a<b ? {} : {tmp=a; a=b; b=tmp;};
-                        printf("if(values[%2d]>values[%2d]) {tmp=values[%2d]; values[%2d]=values[%2d]; values[%2d]=tmp;}\n", i+j, i+j+k, i+j, i+j, i+j+k, i+j+k);
+                        printf("if(values[%d]>values[%d]) {tmp=values[%d]; values[%d]=values[%d]; values[%d]=tmp;}\n", i+j, i+j+k, i+j, i+j, i+j+k, i+j+k);
                 }
             }
         }
