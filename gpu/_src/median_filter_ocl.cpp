@@ -168,239 +168,28 @@ void median_filter_ocl(int imgHeight, int imgWidth, int imgHeightF, int imgWidth
 #endif
 
 	// Load the source code containing the kernel
-	const char *kernel_source="__kernel void kernel_median_filter(__global unsigned char* gInput,\n\
-                                             __global unsigned char* gOutput,\n\
-											 int imgWidth,\n\
-                                             int imgWidthF)\n\
-{\n\
-    // calculate index in global memory for copying (1 byte)\n\
-    int BI = (get_local_size(1)*get_group_id(1)*imgWidthF + get_local_size(0)*get_group_id(0)) * 3; // global base index\n\
-    int L1DID = get_local_id(1)*get_local_size(0) + get_local_id(0); // local 1D index\n\
-    \n\
-    // calculate index in local memory for copying (1 byte)\n\
-    int CYOIP = L1DID/(20*3); // copy y offset in pixels from global base address\n\
-    int CXOIP = (L1DID%(20*3))/3; // copy x offset in pixels from global base address\n\
-    int CCO = L1DID%3; // copy channel offset\n\
-    int rowstep = (get_local_size(0)*get_local_size(1))/(20*3); // next component to copy is this many rows down\n\
-    \n\
-    // declare local memory, copy global -> shared (local) memory\n\
-    // shared memory padded with one dummy channel per pixel plus two dummy channels (1 bank) per row at the ends\n\
-    __local half shmem[20*4+2][20];\n\
-    if(L1DID<20*3*rowstep)\n\
-    {\n\
-        for(int row=0; row<get_local_size(1)+4; row+=rowstep)\n\
-        {\n\
-            shmem[CXOIP*4+CCO][CYOIP+row] = (half)(gInput[BI + (CYOIP*imgWidthF + CXOIP + row*imgWidthF)*3 + CCO]);\n\
-        }\n\
-    }\n\
-\n\
-    // wait for other threads to finish copy\n\
-    barrier(CLK_LOCAL_MEM_FENCE);\n\
-\n\
-    // choose median for the 3 channels of the given pixel\n\
-    half tmp;\n\
-    half r00, r01, r02, r03, r04, r05, r06, r07, r08, r09, r10, r11, r12, r13, r14, r15, r16, r17, r18, r19, r20, r21, r22, r23, r24;\n\
-    \n\
-    // first result (byte) global index\n\
-    BI = ((get_global_id(1))*imgWidth + get_global_id(0)) * 3;\n\
-\n\
-    for(int channel=0; channel<3; channel++)\n\
-    {\n\
-        // load the appropriate 25 values to be sorted\n\
-        r00=shmem[(get_local_id(0)+0)*4+channel][get_local_id(1)+0];\n\
-        r01=shmem[(get_local_id(0)+1)*4+channel][get_local_id(1)+0];\n\
-        r02=shmem[(get_local_id(0)+2)*4+channel][get_local_id(1)+0];\n\
-        r03=shmem[(get_local_id(0)+3)*4+channel][get_local_id(1)+0];\n\
-        r04=shmem[(get_local_id(0)+4)*4+channel][get_local_id(1)+0];\n\
-        r05=shmem[(get_local_id(0)+0)*4+channel][get_local_id(1)+1];\n\
-        r06=shmem[(get_local_id(0)+1)*4+channel][get_local_id(1)+1];\n\
-        r07=shmem[(get_local_id(0)+2)*4+channel][get_local_id(1)+1];\n\
-        r08=shmem[(get_local_id(0)+3)*4+channel][get_local_id(1)+1];\n\
-        r09=shmem[(get_local_id(0)+4)*4+channel][get_local_id(1)+1];\n\
-        r10=shmem[(get_local_id(0)+0)*4+channel][get_local_id(1)+2];\n\
-        r11=shmem[(get_local_id(0)+1)*4+channel][get_local_id(1)+2];\n\
-        r12=shmem[(get_local_id(0)+2)*4+channel][get_local_id(1)+2];\n\
-        r13=shmem[(get_local_id(0)+3)*4+channel][get_local_id(1)+2];\n\
-        r14=shmem[(get_local_id(0)+4)*4+channel][get_local_id(1)+2];\n\
-        r15=shmem[(get_local_id(0)+0)*4+channel][get_local_id(1)+3];\n\
-        r16=shmem[(get_local_id(0)+1)*4+channel][get_local_id(1)+3];\n\
-        r17=shmem[(get_local_id(0)+2)*4+channel][get_local_id(1)+3];\n\
-        r18=shmem[(get_local_id(0)+3)*4+channel][get_local_id(1)+3];\n\
-        r19=shmem[(get_local_id(0)+4)*4+channel][get_local_id(1)+3];\n\
-        r20=shmem[(get_local_id(0)+0)*4+channel][get_local_id(1)+4];\n\
-        r21=shmem[(get_local_id(0)+1)*4+channel][get_local_id(1)+4];\n\
-        r22=shmem[(get_local_id(0)+2)*4+channel][get_local_id(1)+4];\n\
-        r23=shmem[(get_local_id(0)+3)*4+channel][get_local_id(1)+4];\n\
-        r24=shmem[(get_local_id(0)+4)*4+channel][get_local_id(1)+4];\n\
-\n\
-        // find the median, will be in r12\n\
-        tmp=fmax(r00,r01); r00=fmin(r00,r01); r01=tmp;\n\
-        tmp=fmax(r02,r03); r02=fmin(r02,r03); r03=tmp;\n\
-        tmp=fmax(r04,r05); r04=fmin(r04,r05); r05=tmp;\n\
-        tmp=fmax(r06,r07); r06=fmin(r06,r07); r07=tmp;\n\
-        tmp=fmax(r08,r09); r08=fmin(r08,r09); r09=tmp;\n\
-        tmp=fmax(r10,r11); r10=fmin(r10,r11); r11=tmp;\n\
-        tmp=fmax(r12,r13); r12=fmin(r12,r13); r13=tmp;\n\
-        tmp=fmax(r14,r15); r14=fmin(r14,r15); r15=tmp;\n\
-        tmp=fmax(r16,r17); r16=fmin(r16,r17); r17=tmp;\n\
-        tmp=fmax(r18,r19); r18=fmin(r18,r19); r19=tmp;\n\
-        tmp=fmax(r20,r21); r20=fmin(r20,r21); r21=tmp;\n\
-        tmp=fmax(r22,r23); r22=fmin(r22,r23); r23=tmp;\n\
-        tmp=fmax(r00,r02); r00=fmin(r00,r02); r02=tmp;\n\
-        tmp=fmax(r01,r03); r01=fmin(r01,r03); r03=tmp;\n\
-        tmp=fmax(r04,r06); r04=fmin(r04,r06); r06=tmp;\n\
-        tmp=fmax(r05,r07); r05=fmin(r05,r07); r07=tmp;\n\
-        tmp=fmax(r08,r10); r08=fmin(r08,r10); r10=tmp;\n\
-        tmp=fmax(r09,r11); r09=fmin(r09,r11); r11=tmp;\n\
-        tmp=fmax(r12,r14); r12=fmin(r12,r14); r14=tmp;\n\
-        tmp=fmax(r13,r15); r13=fmin(r13,r15); r15=tmp;\n\
-        tmp=fmax(r16,r18); r16=fmin(r16,r18); r18=tmp;\n\
-        tmp=fmax(r17,r19); r17=fmin(r17,r19); r19=tmp;\n\
-        tmp=fmax(r20,r22); r20=fmin(r20,r22); r22=tmp;\n\
-        tmp=fmax(r21,r23); r21=fmin(r21,r23); r23=tmp;\n\
-        tmp=fmax(r01,r02); r01=fmin(r01,r02); r02=tmp;\n\
-        tmp=fmax(r05,r06); r05=fmin(r05,r06); r06=tmp;\n\
-        tmp=fmax(r09,r10); r09=fmin(r09,r10); r10=tmp;\n\
-        tmp=fmax(r13,r14); r13=fmin(r13,r14); r14=tmp;\n\
-        tmp=fmax(r17,r18); r17=fmin(r17,r18); r18=tmp;\n\
-        tmp=fmax(r21,r22); r21=fmin(r21,r22); r22=tmp;\n\
-        tmp=fmax(r00,r04); r00=fmin(r00,r04); r04=tmp;\n\
-        tmp=fmax(r01,r05); r01=fmin(r01,r05); r05=tmp;\n\
-        tmp=fmax(r02,r06); r02=fmin(r02,r06); r06=tmp;\n\
-        tmp=fmax(r03,r07); r03=fmin(r03,r07); r07=tmp;\n\
-        tmp=fmax(r08,r12); r08=fmin(r08,r12); r12=tmp;\n\
-        tmp=fmax(r09,r13); r09=fmin(r09,r13); r13=tmp;\n\
-        tmp=fmax(r10,r14); r10=fmin(r10,r14); r14=tmp;\n\
-        tmp=fmax(r11,r15); r11=fmin(r11,r15); r15=tmp;\n\
-        tmp=fmax(r16,r20); r16=fmin(r16,r20); r20=tmp;\n\
-        tmp=fmax(r17,r21); r17=fmin(r17,r21); r21=tmp;\n\
-        tmp=fmax(r18,r22); r18=fmin(r18,r22); r22=tmp;\n\
-        tmp=fmax(r19,r23); r19=fmin(r19,r23); r23=tmp;\n\
-        tmp=fmax(r02,r04); r02=fmin(r02,r04); r04=tmp;\n\
-        tmp=fmax(r03,r05); r03=fmin(r03,r05); r05=tmp;\n\
-        tmp=fmax(r10,r12); r10=fmin(r10,r12); r12=tmp;\n\
-        tmp=fmax(r11,r13); r11=fmin(r11,r13); r13=tmp;\n\
-        tmp=fmax(r18,r20); r18=fmin(r18,r20); r20=tmp;\n\
-        tmp=fmax(r19,r21); r19=fmin(r19,r21); r21=tmp;\n\
-        tmp=fmax(r01,r02); r01=fmin(r01,r02); r02=tmp;\n\
-        tmp=fmax(r03,r04); r03=fmin(r03,r04); r04=tmp;\n\
-        tmp=fmax(r05,r06); r05=fmin(r05,r06); r06=tmp;\n\
-        tmp=fmax(r09,r10); r09=fmin(r09,r10); r10=tmp;\n\
-        tmp=fmax(r11,r12); r11=fmin(r11,r12); r12=tmp;\n\
-        tmp=fmax(r13,r14); r13=fmin(r13,r14); r14=tmp;\n\
-        tmp=fmax(r17,r18); r17=fmin(r17,r18); r18=tmp;\n\
-        tmp=fmax(r19,r20); r19=fmin(r19,r20); r20=tmp;\n\
-        tmp=fmax(r21,r22); r21=fmin(r21,r22); r22=tmp;\n\
-        tmp=fmax(r00,r08); r00=fmin(r00,r08); r08=tmp;\n\
-        tmp=fmax(r01,r09); r01=fmin(r01,r09); r09=tmp;\n\
-        tmp=fmax(r02,r10); r02=fmin(r02,r10); r10=tmp;\n\
-        tmp=fmax(r03,r11); r03=fmin(r03,r11); r11=tmp;\n\
-        tmp=fmax(r04,r12); r04=fmin(r04,r12); r12=tmp;\n\
-        tmp=fmax(r05,r13); r05=fmin(r05,r13); r13=tmp;\n\
-        tmp=fmax(r06,r14); r06=fmin(r06,r14); r14=tmp;\n\
-        tmp=fmax(r07,r15); r07=fmin(r07,r15); r15=tmp;\n\
-        tmp=fmax(r16,r24); r16=fmin(r16,r24); r24=tmp;\n\
-        tmp=fmax(r04,r08); r04=fmin(r04,r08); r08=tmp;\n\
-        tmp=fmax(r05,r09); r05=fmin(r05,r09); r09=tmp;\n\
-        tmp=fmax(r06,r10); r06=fmin(r06,r10); r10=tmp;\n\
-        tmp=fmax(r07,r11); r07=fmin(r07,r11); r11=tmp;\n\
-        tmp=fmax(r20,r24); r20=fmin(r20,r24); r24=tmp;\n\
-        tmp=fmax(r02,r04); r02=fmin(r02,r04); r04=tmp;\n\
-        tmp=fmax(r03,r05); r03=fmin(r03,r05); r05=tmp;\n\
-        tmp=fmax(r06,r08); r06=fmin(r06,r08); r08=tmp;\n\
-        tmp=fmax(r07,r09); r07=fmin(r07,r09); r09=tmp;\n\
-        tmp=fmax(r10,r12); r10=fmin(r10,r12); r12=tmp;\n\
-        tmp=fmax(r11,r13); r11=fmin(r11,r13); r13=tmp;\n\
-        tmp=fmax(r18,r20); r18=fmin(r18,r20); r20=tmp;\n\
-        tmp=fmax(r19,r21); r19=fmin(r19,r21); r21=tmp;\n\
-        tmp=fmax(r22,r24); r22=fmin(r22,r24); r24=tmp;\n\
-        tmp=fmax(r01,r02); r01=fmin(r01,r02); r02=tmp;\n\
-        tmp=fmax(r03,r04); r03=fmin(r03,r04); r04=tmp;\n\
-        tmp=fmax(r05,r06); r05=fmin(r05,r06); r06=tmp;\n\
-        tmp=fmax(r07,r08); r07=fmin(r07,r08); r08=tmp;\n\
-        tmp=fmax(r09,r10); r09=fmin(r09,r10); r10=tmp;\n\
-        tmp=fmax(r11,r12); r11=fmin(r11,r12); r12=tmp;\n\
-        tmp=fmax(r13,r14); r13=fmin(r13,r14); r14=tmp;\n\
-        tmp=fmax(r17,r18); r17=fmin(r17,r18); r18=tmp;\n\
-        tmp=fmax(r19,r20); r19=fmin(r19,r20); r20=tmp;\n\
-        tmp=fmax(r21,r22); r21=fmin(r21,r22); r22=tmp;\n\
-        tmp=fmax(r23,r24); r23=fmin(r23,r24); r24=tmp;\n\
-        tmp=fmax(r00,r16); r00=fmin(r00,r16); r16=tmp;\n\
-        tmp=fmax(r01,r17); r01=fmin(r01,r17); r17=tmp;\n\
-        tmp=fmax(r02,r18); r02=fmin(r02,r18); r18=tmp;\n\
-        tmp=fmax(r03,r19); r03=fmin(r03,r19); r19=tmp;\n\
-        tmp=fmax(r04,r20); r04=fmin(r04,r20); r20=tmp;\n\
-        tmp=fmax(r05,r21); r05=fmin(r05,r21); r21=tmp;\n\
-        tmp=fmax(r06,r22); r06=fmin(r06,r22); r22=tmp;\n\
-        tmp=fmax(r07,r23); r07=fmin(r07,r23); r23=tmp;\n\
-        tmp=fmax(r08,r24); r08=fmin(r08,r24); r24=tmp;\n\
-        tmp=fmax(r08,r16); r08=fmin(r08,r16); r16=tmp;\n\
-        tmp=fmax(r09,r17); r09=fmin(r09,r17); r17=tmp;\n\
-        tmp=fmax(r10,r18); r10=fmin(r10,r18); r18=tmp;\n\
-        tmp=fmax(r11,r19); r11=fmin(r11,r19); r19=tmp;\n\
-        tmp=fmax(r12,r20); r12=fmin(r12,r20); r20=tmp;\n\
-        tmp=fmax(r13,r21); r13=fmin(r13,r21); r21=tmp;\n\
-        // tmp=fmax(r14,r22); r14=fmin(r14,r22); r22=tmp;\n\
-        // tmp=fmax(r15,r23); r15=fmin(r15,r23); r23=tmp;\n\
-        // tmp=fmax(r04,r08); r04=fmin(r04,r08); r08=tmp;\n\
-        // tmp=fmax(r05,r09); r05=fmin(r05,r09); r09=tmp;\n\
-        tmp=fmax(r06,r10); r06=fmin(r06,r10); r10=tmp;\n\
-        tmp=fmax(r07,r11); r07=fmin(r07,r11); r11=tmp;\n\
-        tmp=fmax(r12,r16); r12=fmin(r12,r16); r16=tmp;\n\
-        tmp=fmax(r13,r17); r13=fmin(r13,r17); r17=tmp;\n\
-        // tmp=fmax(r14,r18); r14=fmin(r14,r18); r18=tmp;\n\
-        // tmp=fmax(r15,r19); r15=fmin(r15,r19); r19=tmp;\n\
-        // tmp=fmax(r20,r24); r20=fmin(r20,r24); r24=tmp;\n\
-        // tmp=fmax(r02,r04); r02=fmin(r02,r04); r04=tmp;\n\
-        // tmp=fmax(r03,r05); r03=fmin(r03,r05); r05=tmp;\n\
-        // tmp=fmax(r06,r08); r06=fmin(r06,r08); r08=tmp;\n\
-        // tmp=fmax(r07,r09); r07=fmin(r07,r09); r09=tmp;\n\
-        tmp=fmax(r10,r12); r10=fmin(r10,r12); r12=tmp;\n\
-        tmp=fmax(r11,r13); r11=fmin(r11,r13); r13=tmp;\n\
-        // tmp=fmax(r14,r16); r14=fmin(r14,r16); r16=tmp;\n\
-        // tmp=fmax(r15,r17); r15=fmin(r15,r17); r17=tmp;\n\
-        // tmp=fmax(r18,r20); r18=fmin(r18,r20); r20=tmp;\n\
-        // tmp=fmax(r19,r21); r19=fmin(r19,r21); r21=tmp;\n\
-        // tmp=fmax(r22,r24); r22=fmin(r22,r24); r24=tmp;\n\
-        // tmp=fmax(r01,r02); r01=fmin(r01,r02); r02=tmp;\n\
-        // tmp=fmax(r03,r04); r03=fmin(r03,r04); r04=tmp;\n\
-        // tmp=fmax(r05,r06); r05=fmin(r05,r06); r06=tmp;\n\
-        // tmp=fmax(r07,r08); r07=fmin(r07,r08); r08=tmp;\n\
-        // tmp=fmax(r09,r10); r09=fmin(r09,r10); r10=tmp;\n\
-        tmp=fmax(r11,r12); r11=fmin(r11,r12); r12=tmp;\n\
-        // tmp=fmax(r13,r14); r13=fmin(r13,r14); r14=tmp;\n\
-        // tmp=fmax(r15,r16); r15=fmin(r15,r16); r16=tmp;\n\
-        // tmp=fmax(r17,r18); r17=fmin(r17,r18); r18=tmp;\n\
-        // tmp=fmax(r19,r20); r19=fmin(r19,r20); r20=tmp;\n\
-        // tmp=fmax(r21,r22); r21=fmin(r21,r22); r22=tmp;\n\
-        // tmp=fmax(r23,r24); r23=fmin(r23,r24); r24=tmp;\n\
-\n\
-        // copy medians to global memory\n\
-        gOutput[BI+channel] = (unsigned char)(r12);\n\
-    }\n\
-}\n\
-";
-	size_t kernel_size=strlen(kernel_source);
-	//
-	//FILE *kernel_file;
-	//char fileName[] = KERNEL_FILE_NAME;
+	char *kernel_source;
+	size_t kernel_size;
+	
+	FILE *kernel_file;
+	char fileName[] = KERNEL_FILE_NAME;
 
-	//fopen_s(&kernel_file, fileName, "r");
-	//if (kernel_file == NULL) {
-	//	fprintf(stderr, "Failed to read kernel from file.\n");
-	//	exit(1);
-	//}
-	//fseek(kernel_file, 0, SEEK_END);
-	//kernel_size = ftell(kernel_file);
-	//rewind(kernel_file);
-	//kernel_source = (char *)malloc(kernel_size + 1);
-	//kernel_source[kernel_size] = '\0';
-	//int read = fread(kernel_source, sizeof(char), kernel_size, kernel_file);
-	//if (read != kernel_size) {
-	//	fprintf(stderr, "Error while reading the kernel.\n");
-	//	exit(1);
-	//}
-	//fclose(kernel_file);
+	fopen_s(&kernel_file, fileName, "r");
+	if (kernel_file == NULL) {
+		fprintf(stderr, "Failed to read kernel from file.\n");
+		exit(1);
+	}
+	fseek(kernel_file, 0, SEEK_END);
+	kernel_size = ftell(kernel_file);
+	rewind(kernel_file);
+	kernel_source = (char *)malloc(kernel_size + 1);
+	kernel_source[kernel_size] = '\0';
+	int read = fread(kernel_source, sizeof(char), kernel_size, kernel_file);
+	if (read != kernel_size) {
+		fprintf(stderr, "Error while reading the kernel.\n");
+		exit(1);
+	}
+	fclose(kernel_file);
 
 	/* Create OpenCL context */
 	context = clCreateContext(NULL, 1, &device_id, NULL, NULL, &ret);
