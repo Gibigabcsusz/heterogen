@@ -77,7 +77,7 @@ void main()
 	short *imgDstConv;
 	imgDstConv = (short*)(_aligned_malloc(3 * imgWidthF*imgHeightF * sizeof(short), 32));
 
-	printf("Start median filtering\n");
+	printf("Start median filtering, %d runs\n",RUNS);
 
 #if 0
 	s0 = clock();
@@ -103,9 +103,9 @@ for (int r=0; r<RUNS; r++)
     e0 = clock();
     d0 = (double)(e0-s0)/(RUNS*CLOCKS_PER_SEC);
 	mpixel = (imgWidth*imgHeight/d0)/1000000;
-    printf("AVX+OpenMP CPU TIME: %4.4f\n", d0*1000);
+	printf("AVX+OpenMP CPU TIME: %4.4f s\n", d0 * 1000);
+	printf("AVX+OpenMP 1 RUN:    %4.4f ms\n", d0 * 1000000/RUNS);
 	printf("AVX+OpenMP Mpixel/s: %4.4f\n", mpixel);
-	printf("Average of %d runs",RUNS);
 #endif
 
 //---------------------------------------------------------------------------------------
