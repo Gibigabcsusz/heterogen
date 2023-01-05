@@ -15,7 +15,7 @@ __kernel void kernel_median_filter(__global unsigned char* gInput,
     int rowstep = (get_local_size(0)*get_local_size(1))/(36*3); // next component to copy is this many rows down
     
     // declare local memory, copy global -> shared (local) memory
-    __local half shmem[36][12][4];
+    __local half shmem[36][12][3];
     if(L1DID<36*3*rowstep)
     {
         for(int row=0; row<get_local_size(1)+4; row+=rowstep)
