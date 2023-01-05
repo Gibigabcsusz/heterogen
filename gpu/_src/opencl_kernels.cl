@@ -9,18 +9,18 @@ __kernel void kernel_median_filter(__global unsigned char* gInput,
     int L1DID = get_local_id(1)*get_local_size(0) + get_local_id(0); // local 1D index
     
     // calculate index in local memory for copying (1 byte)
-    int CYOIP = L1DID/(36*3); // copy y offset in pixels from global base address
-    int CXOIP = (L1DID%(36*3))/3; // copy x offset in pixels from global base address
+    int CYOIP = L1DID/(20*3); // copy y offset in pixels from global base address
+    int CXOIP = (L1DID%(20*3))/3; // copy x offset in pixels from global base address
     int CCO = L1DID%3; // copy channel offset
-    int rowstep = (get_local_size(0)*get_local_size(1))/(36*3); // next component to copy is this many rows down
+    int rowstep = (get_local_size(0)*get_local_size(1))/(20*3); // next component to copy is this many rows down
     
     // declare local memory, copy global -> shared (local) memory
-    __local half shmem[36][12][3];
-    if(L1DID<36*3*rowstep)
+    __local half shmem[20*4+2][20];
+    if(L1DID<20*3*rowstep)
     {
         for(int row=0; row<get_local_size(1)+4; row+=rowstep)
         {
-            shmem[CXOIP][CYOIP+row][CCO] = (float)(gInput[BI + (CYOIP*imgWidthF + CXOIP + row*imgWidthF)*3 + CCO]);
+            shmem[CXOIP*4+CCO][CYOIP+row] = (half)(gInput[BI + (CYOIP*imgWidthF + CXOIP + row*imgWidthF)*3 + CCO]);
         }
     }
 
@@ -44,31 +44,31 @@ __kernel void kernel_median_filter(__global unsigned char* gInput,
                 // values[x+y*5] = shmem[get_local_id(0)+x][get_local_id(1)+y][channel];
             // }
         // }
-        r00=shmem[get_local_id(0)+0][get_local_id(1)+0][channel];
-        r01=shmem[get_local_id(0)+1][get_local_id(1)+0][channel];
-        r02=shmem[get_local_id(0)+2][get_local_id(1)+0][channel];
-        r03=shmem[get_local_id(0)+3][get_local_id(1)+0][channel];
-        r04=shmem[get_local_id(0)+4][get_local_id(1)+0][channel];
-        r05=shmem[get_local_id(0)+0][get_local_id(1)+1][channel];
-        r06=shmem[get_local_id(0)+1][get_local_id(1)+1][channel];
-        r07=shmem[get_local_id(0)+2][get_local_id(1)+1][channel];
-        r08=shmem[get_local_id(0)+3][get_local_id(1)+1][channel];
-        r09=shmem[get_local_id(0)+4][get_local_id(1)+1][channel];
-        r10=shmem[get_local_id(0)+0][get_local_id(1)+2][channel];
-        r11=shmem[get_local_id(0)+1][get_local_id(1)+2][channel];
-        r12=shmem[get_local_id(0)+2][get_local_id(1)+2][channel];
-        r13=shmem[get_local_id(0)+3][get_local_id(1)+2][channel];
-        r14=shmem[get_local_id(0)+4][get_local_id(1)+2][channel];
-        r15=shmem[get_local_id(0)+0][get_local_id(1)+3][channel];
-        r16=shmem[get_local_id(0)+1][get_local_id(1)+3][channel];
-        r17=shmem[get_local_id(0)+2][get_local_id(1)+3][channel];
-        r18=shmem[get_local_id(0)+3][get_local_id(1)+3][channel];
-        r19=shmem[get_local_id(0)+4][get_local_id(1)+3][channel];
-        r20=shmem[get_local_id(0)+0][get_local_id(1)+4][channel];
-        r21=shmem[get_local_id(0)+1][get_local_id(1)+4][channel];
-        r22=shmem[get_local_id(0)+2][get_local_id(1)+4][channel];
-        r23=shmem[get_local_id(0)+3][get_local_id(1)+4][channel];
-        r24=shmem[get_local_id(0)+4][get_local_id(1)+4][channel];
+        r00=shmem[(get_local_id(0)+0)*4+channel][get_local_id(1)+0];
+        r01=shmem[(get_local_id(0)+1)*4+channel][get_local_id(1)+0];
+        r02=shmem[(get_local_id(0)+2)*4+channel][get_local_id(1)+0];
+        r03=shmem[(get_local_id(0)+3)*4+channel][get_local_id(1)+0];
+        r04=shmem[(get_local_id(0)+4)*4+channel][get_local_id(1)+0];
+        r05=shmem[(get_local_id(0)+0)*4+channel][get_local_id(1)+1];
+        r06=shmem[(get_local_id(0)+1)*4+channel][get_local_id(1)+1];
+        r07=shmem[(get_local_id(0)+2)*4+channel][get_local_id(1)+1];
+        r08=shmem[(get_local_id(0)+3)*4+channel][get_local_id(1)+1];
+        r09=shmem[(get_local_id(0)+4)*4+channel][get_local_id(1)+1];
+        r10=shmem[(get_local_id(0)+0)*4+channel][get_local_id(1)+2];
+        r11=shmem[(get_local_id(0)+1)*4+channel][get_local_id(1)+2];
+        r12=shmem[(get_local_id(0)+2)*4+channel][get_local_id(1)+2];
+        r13=shmem[(get_local_id(0)+3)*4+channel][get_local_id(1)+2];
+        r14=shmem[(get_local_id(0)+4)*4+channel][get_local_id(1)+2];
+        r15=shmem[(get_local_id(0)+0)*4+channel][get_local_id(1)+3];
+        r16=shmem[(get_local_id(0)+1)*4+channel][get_local_id(1)+3];
+        r17=shmem[(get_local_id(0)+2)*4+channel][get_local_id(1)+3];
+        r18=shmem[(get_local_id(0)+3)*4+channel][get_local_id(1)+3];
+        r19=shmem[(get_local_id(0)+4)*4+channel][get_local_id(1)+3];
+        r20=shmem[(get_local_id(0)+0)*4+channel][get_local_id(1)+4];
+        r21=shmem[(get_local_id(0)+1)*4+channel][get_local_id(1)+4];
+        r22=shmem[(get_local_id(0)+2)*4+channel][get_local_id(1)+4];
+        r23=shmem[(get_local_id(0)+3)*4+channel][get_local_id(1)+4];
+        r24=shmem[(get_local_id(0)+4)*4+channel][get_local_id(1)+4];
 
         // find the median, will be in r12
         tmp=fmax(r00,r01); r00=fmin(r00,r01); r01=tmp;
