@@ -15,7 +15,7 @@ __kernel void kernel_median_filter(__global unsigned char* gInput,
     int rowstep = (get_local_size(0)*get_local_size(1))/(36*3); // next component to copy is this many rows down
     
     // declare local memory, copy global -> shared (local) memory
-    __local float shmem[36][12][3];
+    __local half shmem[36][12][4];
     if(L1DID<36*3*rowstep)
     {
         for(int row=0; row<get_local_size(1)+4; row+=rowstep)
@@ -28,11 +28,9 @@ __kernel void kernel_median_filter(__global unsigned char* gInput,
     barrier(CLK_LOCAL_MEM_FENCE);
 
     // choose median for the 3 channels of the given pixel
-    //float values[25], tmp;
-    float tmp;
-    float r00, r01, r02, r03, r04, r05, r06, r07, r08, r09, r10, r11, r12, r13, r14, r15, r16, r17, r18, r19, r20, r21, r22, r23, r24;
-    float medians[3];
-
+    half tmp;
+    half r00, r01, r02, r03, r04, r05, r06, r07, r08, r09, r10, r11, r12, r13, r14, r15, r16, r17, r18, r19, r20, r21, r22, r23, r24;
+    
     // first result (byte) global index
     BI = ((get_global_id(1))*imgWidth + get_global_id(0)) * 3;
 
@@ -73,7 +71,6 @@ __kernel void kernel_median_filter(__global unsigned char* gInput,
         r24=shmem[get_local_id(0)+4][get_local_id(1)+4][channel];
 
         // find the median, will be in r12
-
         tmp=fmax(r00,r01); r00=fmin(r00,r01); r01=tmp;
         tmp=fmax(r02,r03); r02=fmin(r02,r03); r03=tmp;
         tmp=fmax(r04,r05); r04=fmin(r04,r05); r05=tmp;
@@ -215,14 +212,11 @@ __kernel void kernel_median_filter(__global unsigned char* gInput,
         // tmp=fmax(r21,r22); r21=fmin(r21,r22); r22=tmp;
         // tmp=fmax(r23,r24); r23=fmin(r23,r24); r24=tmp;
 
-        //barrier(CLK_LOCAL_MEM_FENCE);
-
-
+        // copy medians to global memory
         gOutput[BI+channel] = (unsigned char)(r12);
-        //medians[channel] = r12;
     }
 
-    // copy medians to global memory
+    //barrier(CLK_LOCAL_MEM_FENCE);
     //gOutput[BI+0] = (unsigned char)(medians[0]);
     //gOutput[BI+1] = (unsigned char)(medians[1]);
     //gOutput[BI+2] = (unsigned char)(medians[2]);

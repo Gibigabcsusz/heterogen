@@ -2,7 +2,7 @@
 #define FILTER_H 5
 
 #define RUNS 1
-#define KERNEL_RUNS 200
+#define KERNEL_RUNS 500
 
 #define FIXED_OCL_DEVICE 0
 #define FIXED_OCL_DEVICE_ID 0
