@@ -1,3 +1,4 @@
+//----------------------------------------------------------------------------------------------------------------------------
 __kernel void kernel_median_filter(__global unsigned char* gInput,
                                              __global unsigned char* gOutput,
 											 int imgWidth,
@@ -14,7 +15,6 @@ __kernel void kernel_median_filter(__global unsigned char* gInput,
     int rowstep = (get_local_size(0)*get_local_size(1))/(20*3); // next component to copy is this many rows down
     
     // declare local memory, copy global -> shared (local) memory
-    // shared memory padded with one dummy channel per pixel plus two dummy channels (1 bank) per row at the ends
     __local half shmem[20*4+2][20];
     if(L1DID<20*3*rowstep)
     {
@@ -37,6 +37,13 @@ __kernel void kernel_median_filter(__global unsigned char* gInput,
     for(int channel=0; channel<3; channel++)
     {
         // load the appropriate 25 values to be sorted
+        // for(int i=0; x<25; i++)
+        // {
+            // for(int y=0; y<5; y++)
+            // {
+                // values[x+y*5] = shmem[get_local_id(0)+x][get_local_id(1)+y][channel];
+            // }
+        // }
         r00=shmem[(get_local_id(0)+0)*4+channel][get_local_id(1)+0];
         r01=shmem[(get_local_id(0)+1)*4+channel][get_local_id(1)+0];
         r02=shmem[(get_local_id(0)+2)*4+channel][get_local_id(1)+0];
@@ -208,4 +215,10 @@ __kernel void kernel_median_filter(__global unsigned char* gInput,
         // copy medians to global memory
         gOutput[BI+channel] = (unsigned char)(r12);
     }
+
+    //barrier(CLK_LOCAL_MEM_FENCE);
+    //gOutput[BI+0] = (unsigned char)(medians[0]);
+    //gOutput[BI+1] = (unsigned char)(medians[1]);
+    //gOutput[BI+2] = (unsigned char)(medians[2]);
+
 }
