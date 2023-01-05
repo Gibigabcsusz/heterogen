@@ -5,7 +5,7 @@ __kernel void kernel_median_filter(__global unsigned char* gInput,
                                              int imgWidthF)
 {
     // calculate index in global memory for copying (1 byte)
-    int CGBI = (get_local_size(1)*get_group_id(1)*imgWidthF + get_local_size(0)*get_group_id(0)) * 3; // global base index
+    int BI = (get_local_size(1)*get_group_id(1)*imgWidthF + get_local_size(0)*get_group_id(0)) * 3; // global base index
     int L1DID = get_local_id(1)*get_local_size(0) + get_local_id(0); // local 1D index
     
     // calculate index in local memory for copying (1 byte)
@@ -13,7 +13,6 @@ __kernel void kernel_median_filter(__global unsigned char* gInput,
     int CXOIP = (L1DID%(36*3))/3; // copy x offset in pixels from global base address
     int CCO = L1DID%3; // copy channel offset
     int rowstep = (get_local_size(0)*get_local_size(1))/(36*3); // next component to copy is this many rows down
-    //int rowstep = 2; // next component to copy is this many rows down
     
     // declare local memory, copy global -> shared (local) memory
     __local float shmem[36][12][3];
@@ -21,7 +20,7 @@ __kernel void kernel_median_filter(__global unsigned char* gInput,
     {
         for(int row=0; row<get_local_size(1)+4; row+=rowstep)
         {
-            shmem[CXOIP][CYOIP+row][CCO] = (float)(gInput[CGBI + (CYOIP*imgWidthF + CXOIP + row*imgWidthF)*3 + CCO]);
+            shmem[CXOIP][CYOIP+row][CCO] = (float)(gInput[BI + (CYOIP*imgWidthF + CXOIP + row*imgWidthF)*3 + CCO]);
         }
     }
 
@@ -29,173 +28,203 @@ __kernel void kernel_median_filter(__global unsigned char* gInput,
     barrier(CLK_LOCAL_MEM_FENCE);
 
     // choose median for the 3 channels of the given pixel
-    float values[25], tmp;
+    //float values[25], tmp;
+    float tmp;
+    float r00, r01, r02, r03, r04, r05, r06, r07, r08, r09, r10, r11, r12, r13, r14, r15, r16, r17, r18, r19, r20, r21, r22, r23, r24;
     float medians[3];
 
     // first result (byte) global index
-    int FRGI = ((get_global_id(1))*imgWidth + get_global_id(0)) * 3;
+    BI = ((get_global_id(1))*imgWidth + get_global_id(0)) * 3;
 
     for(int channel=0; channel<3; channel++)
     {
-        // load the appropriate 25 bytes to be sorted
-        for(int x=0; x<5; x++)
-        {
-            for(int y=0; y<5; y++)
-            {
-                values[x+y*5] = shmem[get_local_id(0)+x][get_local_id(1)+y][channel];
-            }
-        }
-        if(values[0]>values[1]) {tmp=values[0]; values[0]=values[1]; values[1]=tmp;}
-        if(values[2]>values[3]) {tmp=values[2]; values[2]=values[3]; values[3]=tmp;}
-        if(values[4]>values[5]) {tmp=values[4]; values[4]=values[5]; values[5]=tmp;}
-        if(values[6]>values[7]) {tmp=values[6]; values[6]=values[7]; values[7]=tmp;}
-        if(values[8]>values[9]) {tmp=values[8]; values[8]=values[9]; values[9]=tmp;}
-        if(values[10]>values[11]) {tmp=values[10]; values[10]=values[11]; values[11]=tmp;}
-        if(values[12]>values[13]) {tmp=values[12]; values[12]=values[13]; values[13]=tmp;}
-        if(values[14]>values[15]) {tmp=values[14]; values[14]=values[15]; values[15]=tmp;}
-        if(values[16]>values[17]) {tmp=values[16]; values[16]=values[17]; values[17]=tmp;}
-        if(values[18]>values[19]) {tmp=values[18]; values[18]=values[19]; values[19]=tmp;}
-        if(values[20]>values[21]) {tmp=values[20]; values[20]=values[21]; values[21]=tmp;}
-        if(values[22]>values[23]) {tmp=values[22]; values[22]=values[23]; values[23]=tmp;}
-        if(values[0]>values[2]) {tmp=values[0]; values[0]=values[2]; values[2]=tmp;}
-        if(values[1]>values[3]) {tmp=values[1]; values[1]=values[3]; values[3]=tmp;}
-        if(values[4]>values[6]) {tmp=values[4]; values[4]=values[6]; values[6]=tmp;}
-        if(values[5]>values[7]) {tmp=values[5]; values[5]=values[7]; values[7]=tmp;}
-        if(values[8]>values[10]) {tmp=values[8]; values[8]=values[10]; values[10]=tmp;}
-        if(values[9]>values[11]) {tmp=values[9]; values[9]=values[11]; values[11]=tmp;}
-        if(values[12]>values[14]) {tmp=values[12]; values[12]=values[14]; values[14]=tmp;}
-        if(values[13]>values[15]) {tmp=values[13]; values[13]=values[15]; values[15]=tmp;}
-        if(values[16]>values[18]) {tmp=values[16]; values[16]=values[18]; values[18]=tmp;}
-        if(values[17]>values[19]) {tmp=values[17]; values[17]=values[19]; values[19]=tmp;}
-        if(values[20]>values[22]) {tmp=values[20]; values[20]=values[22]; values[22]=tmp;}
-        if(values[21]>values[23]) {tmp=values[21]; values[21]=values[23]; values[23]=tmp;}
-        if(values[1]>values[2]) {tmp=values[1]; values[1]=values[2]; values[2]=tmp;}
-        if(values[5]>values[6]) {tmp=values[5]; values[5]=values[6]; values[6]=tmp;}
-        if(values[9]>values[10]) {tmp=values[9]; values[9]=values[10]; values[10]=tmp;}
-        if(values[13]>values[14]) {tmp=values[13]; values[13]=values[14]; values[14]=tmp;}
-        if(values[17]>values[18]) {tmp=values[17]; values[17]=values[18]; values[18]=tmp;}
-        if(values[21]>values[22]) {tmp=values[21]; values[21]=values[22]; values[22]=tmp;}
-        if(values[0]>values[4]) {tmp=values[0]; values[0]=values[4]; values[4]=tmp;}
-        if(values[1]>values[5]) {tmp=values[1]; values[1]=values[5]; values[5]=tmp;}
-        if(values[2]>values[6]) {tmp=values[2]; values[2]=values[6]; values[6]=tmp;}
-        if(values[3]>values[7]) {tmp=values[3]; values[3]=values[7]; values[7]=tmp;}
-        if(values[8]>values[12]) {tmp=values[8]; values[8]=values[12]; values[12]=tmp;}
-        if(values[9]>values[13]) {tmp=values[9]; values[9]=values[13]; values[13]=tmp;}
-        if(values[10]>values[14]) {tmp=values[10]; values[10]=values[14]; values[14]=tmp;}
-        if(values[11]>values[15]) {tmp=values[11]; values[11]=values[15]; values[15]=tmp;}
-        if(values[16]>values[20]) {tmp=values[16]; values[16]=values[20]; values[20]=tmp;}
-        if(values[17]>values[21]) {tmp=values[17]; values[17]=values[21]; values[21]=tmp;}
-        if(values[18]>values[22]) {tmp=values[18]; values[18]=values[22]; values[22]=tmp;}
-        if(values[19]>values[23]) {tmp=values[19]; values[19]=values[23]; values[23]=tmp;}
-        if(values[2]>values[4]) {tmp=values[2]; values[2]=values[4]; values[4]=tmp;}
-        if(values[3]>values[5]) {tmp=values[3]; values[3]=values[5]; values[5]=tmp;}
-        if(values[10]>values[12]) {tmp=values[10]; values[10]=values[12]; values[12]=tmp;}
-        if(values[11]>values[13]) {tmp=values[11]; values[11]=values[13]; values[13]=tmp;}
-        if(values[18]>values[20]) {tmp=values[18]; values[18]=values[20]; values[20]=tmp;}
-        if(values[19]>values[21]) {tmp=values[19]; values[19]=values[21]; values[21]=tmp;}
-        if(values[1]>values[2]) {tmp=values[1]; values[1]=values[2]; values[2]=tmp;}
-        if(values[3]>values[4]) {tmp=values[3]; values[3]=values[4]; values[4]=tmp;}
-        if(values[5]>values[6]) {tmp=values[5]; values[5]=values[6]; values[6]=tmp;}
-        if(values[9]>values[10]) {tmp=values[9]; values[9]=values[10]; values[10]=tmp;}
-        if(values[11]>values[12]) {tmp=values[11]; values[11]=values[12]; values[12]=tmp;}
-        if(values[13]>values[14]) {tmp=values[13]; values[13]=values[14]; values[14]=tmp;}
-        if(values[17]>values[18]) {tmp=values[17]; values[17]=values[18]; values[18]=tmp;}
-        if(values[19]>values[20]) {tmp=values[19]; values[19]=values[20]; values[20]=tmp;}
-        if(values[21]>values[22]) {tmp=values[21]; values[21]=values[22]; values[22]=tmp;}
-        if(values[0]>values[8]) {tmp=values[0]; values[0]=values[8]; values[8]=tmp;}
-        if(values[1]>values[9]) {tmp=values[1]; values[1]=values[9]; values[9]=tmp;}
-        if(values[2]>values[10]) {tmp=values[2]; values[2]=values[10]; values[10]=tmp;}
-        if(values[3]>values[11]) {tmp=values[3]; values[3]=values[11]; values[11]=tmp;}
-        if(values[4]>values[12]) {tmp=values[4]; values[4]=values[12]; values[12]=tmp;}
-        if(values[5]>values[13]) {tmp=values[5]; values[5]=values[13]; values[13]=tmp;}
-        if(values[6]>values[14]) {tmp=values[6]; values[6]=values[14]; values[14]=tmp;}
-        if(values[7]>values[15]) {tmp=values[7]; values[7]=values[15]; values[15]=tmp;}
-        if(values[16]>values[24]) {tmp=values[16]; values[16]=values[24]; values[24]=tmp;}
-        if(values[4]>values[8]) {tmp=values[4]; values[4]=values[8]; values[8]=tmp;}
-        if(values[5]>values[9]) {tmp=values[5]; values[5]=values[9]; values[9]=tmp;}
-        if(values[6]>values[10]) {tmp=values[6]; values[6]=values[10]; values[10]=tmp;}
-        if(values[7]>values[11]) {tmp=values[7]; values[7]=values[11]; values[11]=tmp;}
-        if(values[20]>values[24]) {tmp=values[20]; values[20]=values[24]; values[24]=tmp;}
-        if(values[2]>values[4]) {tmp=values[2]; values[2]=values[4]; values[4]=tmp;}
-        if(values[3]>values[5]) {tmp=values[3]; values[3]=values[5]; values[5]=tmp;}
-        if(values[6]>values[8]) {tmp=values[6]; values[6]=values[8]; values[8]=tmp;}
-        if(values[7]>values[9]) {tmp=values[7]; values[7]=values[9]; values[9]=tmp;}
-        if(values[10]>values[12]) {tmp=values[10]; values[10]=values[12]; values[12]=tmp;}
-        if(values[11]>values[13]) {tmp=values[11]; values[11]=values[13]; values[13]=tmp;}
-        if(values[18]>values[20]) {tmp=values[18]; values[18]=values[20]; values[20]=tmp;}
-        if(values[19]>values[21]) {tmp=values[19]; values[19]=values[21]; values[21]=tmp;}
-        if(values[22]>values[24]) {tmp=values[22]; values[22]=values[24]; values[24]=tmp;}
-        if(values[1]>values[2]) {tmp=values[1]; values[1]=values[2]; values[2]=tmp;}
-        if(values[3]>values[4]) {tmp=values[3]; values[3]=values[4]; values[4]=tmp;}
-        if(values[5]>values[6]) {tmp=values[5]; values[5]=values[6]; values[6]=tmp;}
-        if(values[7]>values[8]) {tmp=values[7]; values[7]=values[8]; values[8]=tmp;}
-        if(values[9]>values[10]) {tmp=values[9]; values[9]=values[10]; values[10]=tmp;}
-        if(values[11]>values[12]) {tmp=values[11]; values[11]=values[12]; values[12]=tmp;}
-        if(values[13]>values[14]) {tmp=values[13]; values[13]=values[14]; values[14]=tmp;}
-        if(values[17]>values[18]) {tmp=values[17]; values[17]=values[18]; values[18]=tmp;}
-        if(values[19]>values[20]) {tmp=values[19]; values[19]=values[20]; values[20]=tmp;}
-        if(values[21]>values[22]) {tmp=values[21]; values[21]=values[22]; values[22]=tmp;}
-        if(values[23]>values[24]) {tmp=values[23]; values[23]=values[24]; values[24]=tmp;}
-        if(values[0]>values[16]) {tmp=values[0]; values[0]=values[16]; values[16]=tmp;}
-        if(values[1]>values[17]) {tmp=values[1]; values[1]=values[17]; values[17]=tmp;}
-        if(values[2]>values[18]) {tmp=values[2]; values[2]=values[18]; values[18]=tmp;}
-        if(values[3]>values[19]) {tmp=values[3]; values[3]=values[19]; values[19]=tmp;}
-        if(values[4]>values[20]) {tmp=values[4]; values[4]=values[20]; values[20]=tmp;}
-        if(values[5]>values[21]) {tmp=values[5]; values[5]=values[21]; values[21]=tmp;}
-        if(values[6]>values[22]) {tmp=values[6]; values[6]=values[22]; values[22]=tmp;}
-        if(values[7]>values[23]) {tmp=values[7]; values[7]=values[23]; values[23]=tmp;}
-        if(values[8]>values[24]) {tmp=values[8]; values[8]=values[24]; values[24]=tmp;}
-        if(values[8]>values[16]) {tmp=values[8]; values[8]=values[16]; values[16]=tmp;}
-        if(values[9]>values[17]) {tmp=values[9]; values[9]=values[17]; values[17]=tmp;}
-        if(values[10]>values[18]) {tmp=values[10]; values[10]=values[18]; values[18]=tmp;}
-        if(values[11]>values[19]) {tmp=values[11]; values[11]=values[19]; values[19]=tmp;}
-        if(values[12]>values[20]) {tmp=values[12]; values[12]=values[20]; values[20]=tmp;}
-        if(values[13]>values[21]) {tmp=values[13]; values[13]=values[21]; values[21]=tmp;}
-        // if(values[14]>values[22]) {tmp=values[14]; values[14]=values[22]; values[22]=tmp;}
-        // if(values[15]>values[23]) {tmp=values[15]; values[15]=values[23]; values[23]=tmp;}
-        // if(values[4]>values[8]) {tmp=values[4]; values[4]=values[8]; values[8]=tmp;}
-        // if(values[5]>values[9]) {tmp=values[5]; values[5]=values[9]; values[9]=tmp;}
-        if(values[6]>values[10]) {tmp=values[6]; values[6]=values[10]; values[10]=tmp;}
-        if(values[7]>values[11]) {tmp=values[7]; values[7]=values[11]; values[11]=tmp;}
-        if(values[12]>values[16]) {tmp=values[12]; values[12]=values[16]; values[16]=tmp;}
-        if(values[13]>values[17]) {tmp=values[13]; values[13]=values[17]; values[17]=tmp;}
-        // if(values[14]>values[18]) {tmp=values[14]; values[14]=values[18]; values[18]=tmp;}
-        // if(values[15]>values[19]) {tmp=values[15]; values[15]=values[19]; values[19]=tmp;}
-        // if(values[20]>values[24]) {tmp=values[20]; values[20]=values[24]; values[24]=tmp;}
-        // if(values[2]>values[4]) {tmp=values[2]; values[2]=values[4]; values[4]=tmp;}
-        // if(values[3]>values[5]) {tmp=values[3]; values[3]=values[5]; values[5]=tmp;}
-        // if(values[6]>values[8]) {tmp=values[6]; values[6]=values[8]; values[8]=tmp;}
-        // if(values[7]>values[9]) {tmp=values[7]; values[7]=values[9]; values[9]=tmp;}
-        if(values[10]>values[12]) {tmp=values[10]; values[10]=values[12]; values[12]=tmp;}
-        if(values[11]>values[13]) {tmp=values[11]; values[11]=values[13]; values[13]=tmp;}
-        // if(values[14]>values[16]) {tmp=values[14]; values[14]=values[16]; values[16]=tmp;}
-        // if(values[15]>values[17]) {tmp=values[15]; values[15]=values[17]; values[17]=tmp;}
-        // if(values[18]>values[20]) {tmp=values[18]; values[18]=values[20]; values[20]=tmp;}
-        // if(values[19]>values[21]) {tmp=values[19]; values[19]=values[21]; values[21]=tmp;}
-        // if(values[22]>values[24]) {tmp=values[22]; values[22]=values[24]; values[24]=tmp;}
-        // if(values[1]>values[2]) {tmp=values[1]; values[1]=values[2]; values[2]=tmp;}
-        // if(values[3]>values[4]) {tmp=values[3]; values[3]=values[4]; values[4]=tmp;}
-        // if(values[5]>values[6]) {tmp=values[5]; values[5]=values[6]; values[6]=tmp;}
-        // if(values[7]>values[8]) {tmp=values[7]; values[7]=values[8]; values[8]=tmp;}
-        // if(values[9]>values[10]) {tmp=values[9]; values[9]=values[10]; values[10]=tmp;}
-        if(values[11]>values[12]) {tmp=values[11]; values[11]=values[12]; values[12]=tmp;}
-        // if(values[13]>values[14]) {tmp=values[13]; values[13]=values[14]; values[14]=tmp;}
-        // if(values[15]>values[16]) {tmp=values[15]; values[15]=values[16]; values[16]=tmp;}
-        // if(values[17]>values[18]) {tmp=values[17]; values[17]=values[18]; values[18]=tmp;}
-        // if(values[19]>values[20]) {tmp=values[19]; values[19]=values[20]; values[20]=tmp;}
-        // if(values[21]>values[22]) {tmp=values[21]; values[21]=values[22]; values[22]=tmp;}
-        // if(values[23]>values[24]) {tmp=values[23]; values[23]=values[24]; values[24]=tmp;}
+        // load the appropriate 25 values to be sorted
+        // for(int i=0; x<25; i++)
+        // {
+            // for(int y=0; y<5; y++)
+            // {
+                // values[x+y*5] = shmem[get_local_id(0)+x][get_local_id(1)+y][channel];
+            // }
+        // }
+        r00=shmem[get_local_id(0)+0][get_local_id(1)+0][channel];
+        r01=shmem[get_local_id(0)+1][get_local_id(1)+0][channel];
+        r02=shmem[get_local_id(0)+2][get_local_id(1)+0][channel];
+        r03=shmem[get_local_id(0)+3][get_local_id(1)+0][channel];
+        r04=shmem[get_local_id(0)+4][get_local_id(1)+0][channel];
+        r05=shmem[get_local_id(0)+0][get_local_id(1)+1][channel];
+        r06=shmem[get_local_id(0)+1][get_local_id(1)+1][channel];
+        r07=shmem[get_local_id(0)+2][get_local_id(1)+1][channel];
+        r08=shmem[get_local_id(0)+3][get_local_id(1)+1][channel];
+        r09=shmem[get_local_id(0)+4][get_local_id(1)+1][channel];
+        r10=shmem[get_local_id(0)+0][get_local_id(1)+2][channel];
+        r11=shmem[get_local_id(0)+1][get_local_id(1)+2][channel];
+        r12=shmem[get_local_id(0)+2][get_local_id(1)+2][channel];
+        r13=shmem[get_local_id(0)+3][get_local_id(1)+2][channel];
+        r14=shmem[get_local_id(0)+4][get_local_id(1)+2][channel];
+        r15=shmem[get_local_id(0)+0][get_local_id(1)+3][channel];
+        r16=shmem[get_local_id(0)+1][get_local_id(1)+3][channel];
+        r17=shmem[get_local_id(0)+2][get_local_id(1)+3][channel];
+        r18=shmem[get_local_id(0)+3][get_local_id(1)+3][channel];
+        r19=shmem[get_local_id(0)+4][get_local_id(1)+3][channel];
+        r20=shmem[get_local_id(0)+0][get_local_id(1)+4][channel];
+        r21=shmem[get_local_id(0)+1][get_local_id(1)+4][channel];
+        r22=shmem[get_local_id(0)+2][get_local_id(1)+4][channel];
+        r23=shmem[get_local_id(0)+3][get_local_id(1)+4][channel];
+        r24=shmem[get_local_id(0)+4][get_local_id(1)+4][channel];
 
-        barrier(CLK_LOCAL_MEM_FENCE);
+        // find the median, will be in r12
+
+        tmp=fmax(r00,r01); r00=fmin(r00,r01); r01=tmp;
+        tmp=fmax(r02,r03); r02=fmin(r02,r03); r03=tmp;
+        tmp=fmax(r04,r05); r04=fmin(r04,r05); r05=tmp;
+        tmp=fmax(r06,r07); r06=fmin(r06,r07); r07=tmp;
+        tmp=fmax(r08,r09); r08=fmin(r08,r09); r09=tmp;
+        tmp=fmax(r10,r11); r10=fmin(r10,r11); r11=tmp;
+        tmp=fmax(r12,r13); r12=fmin(r12,r13); r13=tmp;
+        tmp=fmax(r14,r15); r14=fmin(r14,r15); r15=tmp;
+        tmp=fmax(r16,r17); r16=fmin(r16,r17); r17=tmp;
+        tmp=fmax(r18,r19); r18=fmin(r18,r19); r19=tmp;
+        tmp=fmax(r20,r21); r20=fmin(r20,r21); r21=tmp;
+        tmp=fmax(r22,r23); r22=fmin(r22,r23); r23=tmp;
+        tmp=fmax(r00,r02); r00=fmin(r00,r02); r02=tmp;
+        tmp=fmax(r01,r03); r01=fmin(r01,r03); r03=tmp;
+        tmp=fmax(r04,r06); r04=fmin(r04,r06); r06=tmp;
+        tmp=fmax(r05,r07); r05=fmin(r05,r07); r07=tmp;
+        tmp=fmax(r08,r10); r08=fmin(r08,r10); r10=tmp;
+        tmp=fmax(r09,r11); r09=fmin(r09,r11); r11=tmp;
+        tmp=fmax(r12,r14); r12=fmin(r12,r14); r14=tmp;
+        tmp=fmax(r13,r15); r13=fmin(r13,r15); r15=tmp;
+        tmp=fmax(r16,r18); r16=fmin(r16,r18); r18=tmp;
+        tmp=fmax(r17,r19); r17=fmin(r17,r19); r19=tmp;
+        tmp=fmax(r20,r22); r20=fmin(r20,r22); r22=tmp;
+        tmp=fmax(r21,r23); r21=fmin(r21,r23); r23=tmp;
+        tmp=fmax(r01,r02); r01=fmin(r01,r02); r02=tmp;
+        tmp=fmax(r05,r06); r05=fmin(r05,r06); r06=tmp;
+        tmp=fmax(r09,r10); r09=fmin(r09,r10); r10=tmp;
+        tmp=fmax(r13,r14); r13=fmin(r13,r14); r14=tmp;
+        tmp=fmax(r17,r18); r17=fmin(r17,r18); r18=tmp;
+        tmp=fmax(r21,r22); r21=fmin(r21,r22); r22=tmp;
+        tmp=fmax(r00,r04); r00=fmin(r00,r04); r04=tmp;
+        tmp=fmax(r01,r05); r01=fmin(r01,r05); r05=tmp;
+        tmp=fmax(r02,r06); r02=fmin(r02,r06); r06=tmp;
+        tmp=fmax(r03,r07); r03=fmin(r03,r07); r07=tmp;
+        tmp=fmax(r08,r12); r08=fmin(r08,r12); r12=tmp;
+        tmp=fmax(r09,r13); r09=fmin(r09,r13); r13=tmp;
+        tmp=fmax(r10,r14); r10=fmin(r10,r14); r14=tmp;
+        tmp=fmax(r11,r15); r11=fmin(r11,r15); r15=tmp;
+        tmp=fmax(r16,r20); r16=fmin(r16,r20); r20=tmp;
+        tmp=fmax(r17,r21); r17=fmin(r17,r21); r21=tmp;
+        tmp=fmax(r18,r22); r18=fmin(r18,r22); r22=tmp;
+        tmp=fmax(r19,r23); r19=fmin(r19,r23); r23=tmp;
+        tmp=fmax(r02,r04); r02=fmin(r02,r04); r04=tmp;
+        tmp=fmax(r03,r05); r03=fmin(r03,r05); r05=tmp;
+        tmp=fmax(r10,r12); r10=fmin(r10,r12); r12=tmp;
+        tmp=fmax(r11,r13); r11=fmin(r11,r13); r13=tmp;
+        tmp=fmax(r18,r20); r18=fmin(r18,r20); r20=tmp;
+        tmp=fmax(r19,r21); r19=fmin(r19,r21); r21=tmp;
+        tmp=fmax(r01,r02); r01=fmin(r01,r02); r02=tmp;
+        tmp=fmax(r03,r04); r03=fmin(r03,r04); r04=tmp;
+        tmp=fmax(r05,r06); r05=fmin(r05,r06); r06=tmp;
+        tmp=fmax(r09,r10); r09=fmin(r09,r10); r10=tmp;
+        tmp=fmax(r11,r12); r11=fmin(r11,r12); r12=tmp;
+        tmp=fmax(r13,r14); r13=fmin(r13,r14); r14=tmp;
+        tmp=fmax(r17,r18); r17=fmin(r17,r18); r18=tmp;
+        tmp=fmax(r19,r20); r19=fmin(r19,r20); r20=tmp;
+        tmp=fmax(r21,r22); r21=fmin(r21,r22); r22=tmp;
+        tmp=fmax(r00,r08); r00=fmin(r00,r08); r08=tmp;
+        tmp=fmax(r01,r09); r01=fmin(r01,r09); r09=tmp;
+        tmp=fmax(r02,r10); r02=fmin(r02,r10); r10=tmp;
+        tmp=fmax(r03,r11); r03=fmin(r03,r11); r11=tmp;
+        tmp=fmax(r04,r12); r04=fmin(r04,r12); r12=tmp;
+        tmp=fmax(r05,r13); r05=fmin(r05,r13); r13=tmp;
+        tmp=fmax(r06,r14); r06=fmin(r06,r14); r14=tmp;
+        tmp=fmax(r07,r15); r07=fmin(r07,r15); r15=tmp;
+        tmp=fmax(r16,r24); r16=fmin(r16,r24); r24=tmp;
+        tmp=fmax(r04,r08); r04=fmin(r04,r08); r08=tmp;
+        tmp=fmax(r05,r09); r05=fmin(r05,r09); r09=tmp;
+        tmp=fmax(r06,r10); r06=fmin(r06,r10); r10=tmp;
+        tmp=fmax(r07,r11); r07=fmin(r07,r11); r11=tmp;
+        tmp=fmax(r20,r24); r20=fmin(r20,r24); r24=tmp;
+        tmp=fmax(r02,r04); r02=fmin(r02,r04); r04=tmp;
+        tmp=fmax(r03,r05); r03=fmin(r03,r05); r05=tmp;
+        tmp=fmax(r06,r08); r06=fmin(r06,r08); r08=tmp;
+        tmp=fmax(r07,r09); r07=fmin(r07,r09); r09=tmp;
+        tmp=fmax(r10,r12); r10=fmin(r10,r12); r12=tmp;
+        tmp=fmax(r11,r13); r11=fmin(r11,r13); r13=tmp;
+        tmp=fmax(r18,r20); r18=fmin(r18,r20); r20=tmp;
+        tmp=fmax(r19,r21); r19=fmin(r19,r21); r21=tmp;
+        tmp=fmax(r22,r24); r22=fmin(r22,r24); r24=tmp;
+        tmp=fmax(r01,r02); r01=fmin(r01,r02); r02=tmp;
+        tmp=fmax(r03,r04); r03=fmin(r03,r04); r04=tmp;
+        tmp=fmax(r05,r06); r05=fmin(r05,r06); r06=tmp;
+        tmp=fmax(r07,r08); r07=fmin(r07,r08); r08=tmp;
+        tmp=fmax(r09,r10); r09=fmin(r09,r10); r10=tmp;
+        tmp=fmax(r11,r12); r11=fmin(r11,r12); r12=tmp;
+        tmp=fmax(r13,r14); r13=fmin(r13,r14); r14=tmp;
+        tmp=fmax(r17,r18); r17=fmin(r17,r18); r18=tmp;
+        tmp=fmax(r19,r20); r19=fmin(r19,r20); r20=tmp;
+        tmp=fmax(r21,r22); r21=fmin(r21,r22); r22=tmp;
+        tmp=fmax(r23,r24); r23=fmin(r23,r24); r24=tmp;
+        tmp=fmax(r00,r16); r00=fmin(r00,r16); r16=tmp;
+        tmp=fmax(r01,r17); r01=fmin(r01,r17); r17=tmp;
+        tmp=fmax(r02,r18); r02=fmin(r02,r18); r18=tmp;
+        tmp=fmax(r03,r19); r03=fmin(r03,r19); r19=tmp;
+        tmp=fmax(r04,r20); r04=fmin(r04,r20); r20=tmp;
+        tmp=fmax(r05,r21); r05=fmin(r05,r21); r21=tmp;
+        tmp=fmax(r06,r22); r06=fmin(r06,r22); r22=tmp;
+        tmp=fmax(r07,r23); r07=fmin(r07,r23); r23=tmp;
+        tmp=fmax(r08,r24); r08=fmin(r08,r24); r24=tmp;
+        tmp=fmax(r08,r16); r08=fmin(r08,r16); r16=tmp;
+        tmp=fmax(r09,r17); r09=fmin(r09,r17); r17=tmp;
+        tmp=fmax(r10,r18); r10=fmin(r10,r18); r18=tmp;
+        tmp=fmax(r11,r19); r11=fmin(r11,r19); r19=tmp;
+        tmp=fmax(r12,r20); r12=fmin(r12,r20); r20=tmp;
+        tmp=fmax(r13,r21); r13=fmin(r13,r21); r21=tmp;
+        // tmp=fmax(r14,r22); r14=fmin(r14,r22); r22=tmp;
+        // tmp=fmax(r15,r23); r15=fmin(r15,r23); r23=tmp;
+        // tmp=fmax(r04,r08); r04=fmin(r04,r08); r08=tmp;
+        // tmp=fmax(r05,r09); r05=fmin(r05,r09); r09=tmp;
+        tmp=fmax(r06,r10); r06=fmin(r06,r10); r10=tmp;
+        tmp=fmax(r07,r11); r07=fmin(r07,r11); r11=tmp;
+        tmp=fmax(r12,r16); r12=fmin(r12,r16); r16=tmp;
+        tmp=fmax(r13,r17); r13=fmin(r13,r17); r17=tmp;
+        // tmp=fmax(r14,r18); r14=fmin(r14,r18); r18=tmp;
+        // tmp=fmax(r15,r19); r15=fmin(r15,r19); r19=tmp;
+        // tmp=fmax(r20,r24); r20=fmin(r20,r24); r24=tmp;
+        // tmp=fmax(r02,r04); r02=fmin(r02,r04); r04=tmp;
+        // tmp=fmax(r03,r05); r03=fmin(r03,r05); r05=tmp;
+        // tmp=fmax(r06,r08); r06=fmin(r06,r08); r08=tmp;
+        // tmp=fmax(r07,r09); r07=fmin(r07,r09); r09=tmp;
+        tmp=fmax(r10,r12); r10=fmin(r10,r12); r12=tmp;
+        tmp=fmax(r11,r13); r11=fmin(r11,r13); r13=tmp;
+        // tmp=fmax(r14,r16); r14=fmin(r14,r16); r16=tmp;
+        // tmp=fmax(r15,r17); r15=fmin(r15,r17); r17=tmp;
+        // tmp=fmax(r18,r20); r18=fmin(r18,r20); r20=tmp;
+        // tmp=fmax(r19,r21); r19=fmin(r19,r21); r21=tmp;
+        // tmp=fmax(r22,r24); r22=fmin(r22,r24); r24=tmp;
+        // tmp=fmax(r01,r02); r01=fmin(r01,r02); r02=tmp;
+        // tmp=fmax(r03,r04); r03=fmin(r03,r04); r04=tmp;
+        // tmp=fmax(r05,r06); r05=fmin(r05,r06); r06=tmp;
+        // tmp=fmax(r07,r08); r07=fmin(r07,r08); r08=tmp;
+        // tmp=fmax(r09,r10); r09=fmin(r09,r10); r10=tmp;
+        tmp=fmax(r11,r12); r11=fmin(r11,r12); r12=tmp;
+        // tmp=fmax(r13,r14); r13=fmin(r13,r14); r14=tmp;
+        // tmp=fmax(r15,r16); r15=fmin(r15,r16); r16=tmp;
+        // tmp=fmax(r17,r18); r17=fmin(r17,r18); r18=tmp;
+        // tmp=fmax(r19,r20); r19=fmin(r19,r20); r20=tmp;
+        // tmp=fmax(r21,r22); r21=fmin(r21,r22); r22=tmp;
+        // tmp=fmax(r23,r24); r23=fmin(r23,r24); r24=tmp;
+
+        //barrier(CLK_LOCAL_MEM_FENCE);
 
 
-        gOutput[FRGI+channel] = (unsigned char)(values[12]);
-        //medians[channel] = values[12];
+        gOutput[BI+channel] = (unsigned char)(r12);
+        //medians[channel] = r12;
     }
 
     // copy medians to global memory
-    //gOutput[FRGI+0] = (unsigned char)(medians[0]);
-    //gOutput[FRGI+1] = (unsigned char)(medians[1]);
-    //gOutput[FRGI+2] = (unsigned char)(medians[2]);
+    //gOutput[BI+0] = (unsigned char)(medians[0]);
+    //gOutput[BI+1] = (unsigned char)(medians[1]);
+    //gOutput[BI+2] = (unsigned char)(medians[2]);
 
 }
