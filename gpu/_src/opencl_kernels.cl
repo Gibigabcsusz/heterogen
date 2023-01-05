@@ -9,17 +9,19 @@ __kernel void kernel_median_filter(__global unsigned char* gInput,
     int L1DID = get_local_id(1)*get_local_size(0) + get_local_id(0); // local 1D index
     
     // calculate index in local memory for copying (1 byte)
-    int CYOIP = L1DID/60; // copy y offset in pixels from global base address
-    int CXOIP = (L1DID%60)/3; // copy x offset in pixels from global base address
+    int CYOIP = L1DID/(36*3); // copy y offset in pixels from global base address
+    int CXOIP = (L1DID%(36*3))/3; // copy x offset in pixels from global base address
     int CCO = L1DID%3; // copy channel offset
+    int rowstep = (get_local_size(0)*get_local_size(1))/(36*3); // next component to copy is this many rows down
+    //int rowstep = 2; // next component to copy is this many rows down
     
     // declare local memory, copy global -> shared (local) memory
-    __local unsigned char shmem[20][20][3];
-    if(L1DID<240)
+    __local float shmem[36][12][3];
+    if(L1DID<36*3*rowstep)
     {
-        for(int i=0; i<5; i++)
+        for(int row=0; row<get_local_size(1)+4; row+=rowstep)
         {
-            shmem[CXOIP][CYOIP+i*4][CCO] = gInput[CGBI + (CYOIP*imgWidthF + CXOIP + i*4*imgWidthF)*3 + CCO];
+            shmem[CXOIP][CYOIP+row][CCO] = (float)(gInput[CGBI + (CYOIP*imgWidthF + CXOIP + row*imgWidthF)*3 + CCO]);
         }
     }
 
@@ -27,8 +29,12 @@ __kernel void kernel_median_filter(__global unsigned char* gInput,
     barrier(CLK_LOCAL_MEM_FENCE);
 
     // choose median for the 3 channels of the given pixel
-    unsigned char values[25], tmp;
-    unsigned char medians[3];
+    float values[25], tmp;
+    float medians[3];
+
+    // first result (byte) global index
+    int FRGI = ((get_global_id(1))*imgWidth + get_global_id(0)) * 3;
+
     for(int channel=0; channel<3; channel++)
     {
         // load the appropriate 25 bytes to be sorted
@@ -180,15 +186,16 @@ __kernel void kernel_median_filter(__global unsigned char* gInput,
         // if(values[21]>values[22]) {tmp=values[21]; values[21]=values[22]; values[22]=tmp;}
         // if(values[23]>values[24]) {tmp=values[23]; values[23]=values[24]; values[24]=tmp;}
 
+        barrier(CLK_LOCAL_MEM_FENCE);
 
-        medians[channel] = values[12];
+
+        gOutput[FRGI+channel] = (unsigned char)(values[12]);
+        //medians[channel] = values[12];
     }
-    // first result (byte) global index
-    int FRGI = ((get_global_id(1))*imgWidth + get_global_id(0)) * 3;
 
     // copy medians to global memory
-    gOutput[FRGI+0] = medians[0];
-    gOutput[FRGI+1] = medians[1];
-    gOutput[FRGI+2] = medians[2];
+    //gOutput[FRGI+0] = (unsigned char)(medians[0]);
+    //gOutput[FRGI+1] = (unsigned char)(medians[1]);
+    //gOutput[FRGI+2] = (unsigned char)(medians[2]);
 
 }
